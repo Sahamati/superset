@@ -22,8 +22,8 @@ import {
   QueryFormData,
   QueryFormMetric,
 } from '@superset-ui/core';
-import { BaseChartProps, BaseTransformedProps } from '../types';
 import { RgbaColor } from 'packages/superset-ui-core/src/color/types';
+import { BaseChartProps, BaseTransformedProps } from '../types';
 
 export interface HeatmapFormData extends QueryFormData {
   bottomMargin: string;
