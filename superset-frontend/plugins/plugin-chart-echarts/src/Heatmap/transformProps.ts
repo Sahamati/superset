@@ -156,9 +156,11 @@ export default function transformProps(
           : undefined,
       },
       emphasis: {
-        shadowBlur: 10,
-        shadowColor: supersetTheme.colors.grayscale.dark2,
-        borderColor: supersetTheme.colors.grayscale.light5,
+        itemStyle: {
+          shadowBlur: 10,
+          shadowColor: supersetTheme.colors.grayscale.dark2,
+          borderColor: supersetTheme.colors.grayscale.light5,
+        },
       },
     },
   ];
