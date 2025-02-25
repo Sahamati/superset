@@ -23,6 +23,7 @@ import {
   QueryFormMetric,
 } from '@superset-ui/core';
 import { BaseChartProps, BaseTransformedProps } from '../types';
+import { RgbaColor } from 'packages/superset-ui-core/src/color/types';
 
 export interface HeatmapFormData extends QueryFormData {
   bottomMargin: string;
@@ -33,6 +34,8 @@ export interface HeatmapFormData extends QueryFormData {
   metric: QueryFormMetric;
   normalizeAcross: 'heatmap' | 'x' | 'y';
   normalized?: boolean;
+  enableBorder?: boolean;
+  elementBorder?: RgbaColor;
   showLegend?: boolean;
   showPercentage?: boolean;
   showValues?: boolean;

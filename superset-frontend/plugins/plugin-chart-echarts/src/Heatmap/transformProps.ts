@@ -24,6 +24,8 @@ import {
   getSequentialSchemeRegistry,
   getTimeFormatter,
   getValueFormatter,
+  rgbToHex,
+  supersetTheme,
 } from '@superset-ui/core';
 import memoizeOne from 'memoize-one';
 import { maxBy, minBy } from 'lodash';
@@ -32,7 +34,7 @@ import { CallbackDataParams } from 'echarts/types/src/util/types';
 import { HeatmapChartProps, HeatmapTransformedProps } from './types';
 import { getDefaultTooltip } from '../utils/tooltip';
 import { Refs } from '../types';
-import { parseAxisBound } from '../utils/controls';
+import { parseYAxisBound } from '../utils/controls';
 import { NULL_STRING } from '../constants';
 
 // Calculated totals per x and y categories plus total
@@ -78,6 +80,8 @@ export default function transformProps(
     metric,
     normalizeAcross,
     normalized,
+    enableBorder,
+    elementBorder = { r: 0, g: 0, b: 0 },
     showLegend,
     showPercentage,
     showValues,
@@ -98,7 +102,7 @@ export default function transformProps(
   const colors = getSequentialSchemeRegistry().get(linearColorScheme)?.colors;
   const getAxisFormatter =
     (colType: GenericDataType) => (value: number | string) => {
-      if (colType === GenericDataType.Temporal) {
+      if (colType === GenericDataType.TEMPORAL) {
         if (typeof value === 'string') {
           return getTimeFormatter(xAxisTimeFormat)(Number.parseInt(value, 10));
         }
@@ -117,7 +121,7 @@ export default function transformProps(
     currencyFormat,
   );
 
-  let [min, max] = (valueBounds || []).map(parseAxisBound);
+  let [min, max] = (valueBounds || []).map(parseYAxisBound);
   if (min === undefined) {
     min = minBy(data, row => row[colorColumn])?.[colorColumn] as number;
   }
@@ -145,6 +149,16 @@ export default function transformProps(
         show: showValues,
         formatter: (params: CallbackDataParams) =>
           valueFormatter(params.value[2]),
+      },
+      itemStyle: {
+        borderColor: enableBorder
+          ? rgbToHex(elementBorder.r, elementBorder.g, elementBorder.b)
+          : undefined,
+      },
+      emphasis: {
+        shadowBlur: 10,
+        shadowColor: supersetTheme.colors.grayscale.dark2,
+        borderColor: supersetTheme.colors.grayscale.light5,
       },
     },
   ];
