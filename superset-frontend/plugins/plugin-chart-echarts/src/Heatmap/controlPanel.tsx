@@ -20,6 +20,7 @@ import React from 'react';
 import { t, validateNonEmpty } from '@superset-ui/core';
 import {
   ControlPanelConfig,
+  ControlSubSectionHeader,
   formatSelectOptionsForRange,
   getStandardizedControls,
 } from '@superset-ui/chart-controls';
@@ -227,6 +228,33 @@ const config: ControlPanelConfig = {
         ['y_axis_format'],
         ['x_axis_time_format'],
         ['currency_format'],
+        [<ControlSubSectionHeader>Border</ControlSubSectionHeader>],
+        [
+          {
+            name: 'element_border',
+            config: {
+              type: 'ColorPickerControl',
+              label: t('Border Color'),
+              renderTrigger: true,
+              description: t(
+                'Choose the color of the element border (if enabled)',
+              ),
+              default: { r: 255, g: 255, b: 255, a: 1 },
+            },
+          },
+        ],
+        [
+          {
+            name: 'enable_border',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Enable Border'),
+              renderTrigger: true,
+              description: t('Enable borders'),
+              default: false,
+            },
+          },
+        ],
         [
           {
             name: 'show_legend',
