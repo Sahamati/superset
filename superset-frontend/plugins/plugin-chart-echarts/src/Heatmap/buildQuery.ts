@@ -50,8 +50,8 @@ export default function buildQuery(formData: HeatmapFormData) {
     normalize_across === 'x'
       ? getColumnLabel(x_axis)
       : normalize_across === 'y'
-        ? getColumnLabel(groupby as unknown as QueryFormColumn)
-        : undefined;
+      ? getColumnLabel(groupby as unknown as QueryFormColumn)
+       : undefined;
   return buildQueryContext(formData, baseQueryObject => [
     {
       ...baseQueryObject,
