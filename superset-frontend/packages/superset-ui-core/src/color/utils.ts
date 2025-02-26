@@ -124,7 +124,7 @@ export function rgbToHexWithAlpha(
   red: number,
   green: number,
   blue: number,
-  opacity: number = 1,
+  opacity = 1,
 ): string {
   if (opacity < 0 || opacity > 1) {
     throw new Error(
