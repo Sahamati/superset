@@ -152,7 +152,12 @@ export default function transformProps(
       },
       itemStyle: {
         borderColor: enableBorder
-          ? rgbToHexWithAlpha(elementBorder.r, elementBorder.g, elementBorder.b, elementBorder.a)
+          ? rgbToHexWithAlpha(
+              elementBorder.r,
+              elementBorder.g,
+              elementBorder.b,
+              elementBorder.a,
+            )
           : undefined,
       },
       emphasis: {
