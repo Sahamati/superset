@@ -24,7 +24,7 @@ import {
   getSequentialSchemeRegistry,
   getTimeFormatter,
   getValueFormatter,
-  rgbToHex,
+  rgbToHexWithAlpha,
   supersetTheme,
 } from '@superset-ui/core';
 import memoizeOne from 'memoize-one';
@@ -81,7 +81,7 @@ export default function transformProps(
     normalizeAcross,
     normalized,
     enableBorder,
-    elementBorder = { r: 0, g: 0, b: 0 },
+    elementBorder = { r: 0, g: 0, b: 0, a: 1 },
     showLegend,
     showPercentage,
     showValues,
@@ -152,7 +152,7 @@ export default function transformProps(
       },
       itemStyle: {
         borderColor: enableBorder
-          ? rgbToHex(elementBorder.r, elementBorder.g, elementBorder.b)
+          ? rgbToHexWithAlpha(elementBorder.r, elementBorder.g, elementBorder.b, elementBorder.a)
           : undefined,
       },
       emphasis: {
