@@ -20,7 +20,6 @@ import React from 'react';
 import { t, validateNonEmpty } from '@superset-ui/core';
 import {
   ControlPanelConfig,
-  ControlSubSectionHeader,
   formatSelectOptionsForRange,
   getStandardizedControls,
 } from '@superset-ui/chart-controls';
@@ -129,6 +128,31 @@ const config: ControlPanelConfig = {
         ['linear_color_scheme'],
         [
           {
+            name: 'border_color',
+            config: {
+              type: 'ColorPickerControl',
+              label: t('Border color'),
+              renderTrigger: true,
+              description: t('The color of the elements border'),
+              default: { r: 0, g: 0, b: 0, a: 1 },
+            },
+          },
+          {
+            name: 'border_width',
+            config: {
+              type: 'SliderControl',
+              label: t('Border width'),
+              renderTrigger: true,
+              min: 0,
+              max: 2,
+              default: 0,
+              step: 0.1,
+              description: t('The width of the elements border'),
+            },
+          },
+        ],
+        [
+          {
             name: 'xscale_interval',
             config: {
               type: 'SelectControl',
@@ -228,33 +252,6 @@ const config: ControlPanelConfig = {
         ['y_axis_format'],
         ['x_axis_time_format'],
         ['currency_format'],
-        [<ControlSubSectionHeader>Border</ControlSubSectionHeader>],
-        [
-          {
-            name: 'element_border',
-            config: {
-              type: 'ColorPickerControl',
-              label: t('Border Color'),
-              renderTrigger: true,
-              description: t(
-                'Choose the color of the element border (if enabled)',
-              ),
-              default: { r: 0, g: 0, b: 0, a: 1 },
-            },
-          },
-        ],
-        [
-          {
-            name: 'enable_border',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Enable Border'),
-              renderTrigger: true,
-              description: t('Enable borders'),
-              default: false,
-            },
-          },
-        ],
         [
           {
             name: 'show_legend',
