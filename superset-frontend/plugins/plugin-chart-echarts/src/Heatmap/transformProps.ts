@@ -24,7 +24,8 @@ import {
   getSequentialSchemeRegistry,
   getTimeFormatter,
   getValueFormatter,
-  rgbToHexWithAlpha,
+  rgbToHex,
+  addAlpha,
   supersetTheme,
 } from '@superset-ui/core';
 import memoizeOne from 'memoize-one';
@@ -80,8 +81,8 @@ export default function transformProps(
     metric,
     normalizeAcross,
     normalized,
-    enableBorder,
-    elementBorder = { r: 0, g: 0, b: 0, a: 1 },
+    borderColor,
+    borderWidth = 0,
     showLegend,
     showPercentage,
     showValues,
@@ -151,20 +152,17 @@ export default function transformProps(
           valueFormatter(params.value[2]),
       },
       itemStyle: {
-        borderColor: enableBorder
-          ? rgbToHexWithAlpha(
-              elementBorder.r,
-              elementBorder.g,
-              elementBorder.b,
-              elementBorder.a,
-            )
-          : undefined,
+        borderColor: addAlpha(
+          rgbToHex(borderColor.r, borderColor.g, borderColor.b),
+          borderColor.a,
+        ),
+        borderWidth,
       },
       emphasis: {
         itemStyle: {
+          borderColor: supersetTheme.colors.grayscale.light5,
           shadowBlur: 10,
           shadowColor: supersetTheme.colors.grayscale.dark2,
-          borderColor: supersetTheme.colors.grayscale.light5,
         },
       },
     },
