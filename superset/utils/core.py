@@ -1848,7 +1848,7 @@ def normalize_dttm_col(
                 errors="coerce",
             )
         if _col.offset:
-            df[_col.col_label] += timedelta(hours=_col.offset)
+            df[_col.col_label] += timedelta(minutes=_col.offset)
         if _col.time_shift is not None:
             df[_col.col_label] += parse_human_timedelta(_col.time_shift)
 
