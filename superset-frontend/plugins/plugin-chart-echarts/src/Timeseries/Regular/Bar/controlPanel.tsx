@@ -319,6 +319,32 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: 'zoomable_start',
+            config: {
+              type: 'SliderControl',
+              label: t('Data Zoom Start%'),
+              default: 0,
+              min: 0,
+              step: 1,
+              renderTrigger: true,
+              description: t('Data zoom starting point %'),
+            },
+          },
+          {
+            name: 'zoomable_end',
+            config: {
+              type: 'SliderControl',
+              label: t('Data Zoom End%'),
+              default: 100,
+              max: 100,
+              step: 1,
+              renderTrigger: true,
+              description: t('Data zoom ending point %'),
+            },
+          },
+        ],
         ...legendSection,
         [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
         ...createAxisControl('x'),

@@ -81,6 +81,8 @@ export type EchartsTimeseriesFormData = QueryFormData & {
   timeGrainSqla?: TimeGranularity;
   yAxisBounds: [number | undefined | null, number | undefined | null];
   zoomable: boolean;
+  zoomableStart: number;
+  zoomableEnd: number;
   richTooltip: boolean;
   xAxisLabelRotation: number;
   groupby: QueryFormColumn[];

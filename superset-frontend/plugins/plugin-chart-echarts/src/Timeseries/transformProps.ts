@@ -173,6 +173,8 @@ export default function transformProps(
     yAxisTitleMargin,
     yAxisTitlePosition,
     zoomable,
+    zoomableStart,
+    zoomableEnd,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
   const refs: Refs = {};
 
@@ -562,8 +564,8 @@ export default function transformProps(
       ? [
           {
             type: 'slider',
-            start: TIMESERIES_CONSTANTS.dataZoomStart,
-            end: TIMESERIES_CONSTANTS.dataZoomEnd,
+            start: zoomableStart,
+            end: zoomableEnd,
             bottom: TIMESERIES_CONSTANTS.zoomBottom,
           },
         ]
