@@ -306,7 +306,32 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         ...seriesOrderSection,
         ['color_scheme'],
-        ...showValueSection,
+        ...showValueSection.slice(0, 1),
+        [
+          {
+            name: 'rotate_value',
+            config: {
+              type: 'TextControl',
+              label: t('Rotate Value Label'),
+              default: DEFAULT_FORM_DATA.rotateValue,
+              renderTrigger: true,
+              description: t('Rotate the value label by a certain degree.'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'distance_value',
+            config: {
+              type: 'TextControl',
+              label: t('Value Label Distance'),
+              default: DEFAULT_FORM_DATA.distanceValue,
+              renderTrigger: true,
+              description: t('Distance of the value label from the bar'),
+            },
+          },
+        ],
+        ...showValueSection.slice(1),
         [
           {
             name: 'zoomable',
