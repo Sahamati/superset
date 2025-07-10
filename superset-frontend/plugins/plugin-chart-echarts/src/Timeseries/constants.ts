@@ -66,6 +66,8 @@ export const DEFAULT_FORM_DATA: EchartsTimeseriesFormData = {
   xAxisLabelRotation: 0,
   groupby: [],
   showValue: false,
+  rotateValue: 0,
+  distanceValue: 0,
   onlyTotal: false,
   percentageThreshold: 0,
   orientation: OrientationType.vertical,

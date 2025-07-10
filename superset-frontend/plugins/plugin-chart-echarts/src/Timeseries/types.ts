@@ -87,6 +87,8 @@ export type EchartsTimeseriesFormData = QueryFormData & {
   xAxisLabelRotation: number;
   groupby: QueryFormColumn[];
   showValue: boolean;
+  rotateValue: number;
+  distanceValue: number;
   onlyTotal: boolean;
   showExtraControls: boolean;
   percentageThreshold: number;
