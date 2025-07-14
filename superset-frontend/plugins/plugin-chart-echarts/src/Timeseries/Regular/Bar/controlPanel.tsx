@@ -355,6 +355,8 @@ const config: ControlPanelConfig = {
               step: 1,
               renderTrigger: true,
               description: t('Data zoom starting point %'),
+            //TODO  visibility: ({ controls }: ControlPanelsContainerProps) =>
+            //        Boolean(controls?.zoomable_start?.value),
             },
           },
           {
