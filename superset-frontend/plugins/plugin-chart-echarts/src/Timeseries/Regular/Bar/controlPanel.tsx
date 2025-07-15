@@ -191,9 +191,7 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           type: 'SelectControl',
           label: t('Scale Interval'),
           renderTrigger: true,
-          choices: [[-1, t('Auto')]].concat(
-            formatSelectOptionsForRange(1, 50),
-          ),
+          choices: [[-1, t('Auto')]].concat(formatSelectOptionsForRange(1, 50)),
           default: -1,
           clearable: false,
           description: t(
@@ -222,9 +220,7 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           type: 'SelectControl',
           label: t('Scale Interval'),
           renderTrigger: true,
-          choices: [[-1, t('Auto')]].concat(
-            formatSelectOptionsForRange(1, 50),
-          ),
+          choices: [[-1, t('Auto')]].concat(formatSelectOptionsForRange(1, 50)),
           default: -1,
           clearable: false,
           description: t(
@@ -358,7 +354,7 @@ const config: ControlPanelConfig = {
               renderTrigger: true,
               description: t('Rotate the value label by a certain degree.'),
               visibility: ({ controls }: ControlPanelsContainerProps) =>
-                Boolean(controls?.show_value?.value),              
+                Boolean(controls?.show_value?.value),
             },
           },
         ],
