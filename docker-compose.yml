@@ -105,7 +105,7 @@ services:
       disable: true
 
   superset-node:
-    image: node:16
+    image: node:16-bullseye
     container_name: superset_node
     command: ["/app/docker/docker-frontend.sh"]
     env_file: docker/.env
