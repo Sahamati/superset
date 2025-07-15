@@ -17,7 +17,7 @@
  * under the License.
  */
 /* eslint-disable camelcase */
-import { invert } from 'lodash';
+import { filter, invert } from 'lodash';
 import {
   AnnotationLayer,
   CategoricalColorNamespace,
@@ -571,7 +571,9 @@ export default function transformProps(
     dataZoom: zoomable
       ? [
           {
+            id: 'dataZoomX',
             type: 'slider',
+            filterMode: 'empty',
             start: zoomableStart,
             end: zoomableEnd,
             bottom: TIMESERIES_CONSTANTS.zoomBottom,

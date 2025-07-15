@@ -27,6 +27,7 @@ import {
   D3_TIME_FORMAT_DOCS,
   formatSelectOptions,
   getStandardizedControls,
+  formatSelectOptionsForRange,
   sections,
   sharedControls,
 } from '@superset-ui/chart-controls';
@@ -185,10 +186,50 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
     ],
     [
       {
+        name: 'x_scale_interval',
+        config: {
+          type: 'SelectControl',
+          label: t('Scale Interval'),
+          renderTrigger: true,
+          choices: [[-1, t('Auto')]].concat(
+            formatSelectOptionsForRange(1, 50),
+          ),
+          default: -1,
+          clearable: false,
+          description: t(
+            'Number of steps to take between ticks when displaying the scale',
+          ),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isVertical(controls) : isHorizontal(controls),
+        },
+      },
+    ],
+    [
+      {
         name: 'y_axis_format',
         config: {
           ...sharedControls.y_axis_format,
           label: t('Axis Format'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            isXAxis ? isHorizontal(controls) : isVertical(controls),
+        },
+      },
+    ],
+    [
+      {
+        name: 'y_scale_interval',
+        config: {
+          type: 'SelectControl',
+          label: t('Scale Interval'),
+          renderTrigger: true,
+          choices: [[-1, t('Auto')]].concat(
+            formatSelectOptionsForRange(1, 50),
+          ),
+          default: -1,
+          clearable: false,
+          description: t(
+            'Number of steps to take between ticks when displaying the scale',
+          ),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
             isXAxis ? isHorizontal(controls) : isVertical(controls),
         },
@@ -316,6 +357,8 @@ const config: ControlPanelConfig = {
               default: DEFAULT_FORM_DATA.rotateValue,
               renderTrigger: true,
               description: t('Rotate the value label by a certain degree.'),
+              visibility: ({ controls }: ControlPanelsContainerProps) =>
+                Boolean(controls?.show_value?.value),              
             },
           },
         ],
@@ -328,6 +371,8 @@ const config: ControlPanelConfig = {
               default: DEFAULT_FORM_DATA.distanceValue,
               renderTrigger: true,
               description: t('Distance of the value label from the bar'),
+              visibility: ({ controls }: ControlPanelsContainerProps) =>
+                Boolean(controls?.show_value?.value),
             },
           },
         ],
@@ -355,8 +400,8 @@ const config: ControlPanelConfig = {
               step: 1,
               renderTrigger: true,
               description: t('Data zoom starting point %'),
-            //TODO  visibility: ({ controls }: ControlPanelsContainerProps) =>
-            //        Boolean(controls?.zoomable_start?.value),
+              visibility: ({ controls }: ControlPanelsContainerProps) =>
+                Boolean(controls?.zoomable?.value),
             },
           },
           {
@@ -369,6 +414,8 @@ const config: ControlPanelConfig = {
               step: 1,
               renderTrigger: true,
               description: t('Data zoom ending point %'),
+              visibility: ({ controls }: ControlPanelsContainerProps) =>
+                Boolean(controls?.zoomable?.value),
             },
           },
         ],

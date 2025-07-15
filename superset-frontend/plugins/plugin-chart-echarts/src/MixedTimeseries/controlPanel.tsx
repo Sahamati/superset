@@ -21,6 +21,7 @@ import { ensureIsArray, hasGenericChartAxes, t } from '@superset-ui/core';
 import { cloneDeep } from 'lodash';
 import {
   ControlPanelConfig,
+  ControlPanelsContainerProps,
   ControlPanelSectionConfig,
   ControlSetRow,
   ControlSubSectionHeader,
@@ -193,6 +194,34 @@ function createCustomizeSection(
     ],
     [
       {
+        name: `rotate_value${controlSuffix}`,
+        config: {
+          type: 'TextControl',
+          label: t('Rotate Value Label'),
+          default: DEFAULT_FORM_DATA.rotateValue,
+          renderTrigger: true,
+          description: t('Rotate the value label by a certain degree.'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            Boolean(controls?.[`show_value${controlSuffix}`].value),
+        },
+      },
+    ],
+    [
+      {
+        name: `distance_value${controlSuffix}`,
+        config: {
+          type: 'TextControl',
+          label: t('Value Label Distance'),
+          default: DEFAULT_FORM_DATA.distanceValue,
+          renderTrigger: true,
+          description: t('Distance of the value label from the bar'),
+          visibility: ({ controls }: ControlPanelsContainerProps) =>
+            Boolean(controls?.[`show_value${controlSuffix}`].value),
+        },
+      },
+    ],
+    [
+      {
         name: `opacity${controlSuffix}`,
         config: {
           type: 'SliderControl',
@@ -308,6 +337,36 @@ const config: ControlPanelConfig = {
               default: zoomable,
               renderTrigger: true,
               description: t('Enable data zooming controls'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'zoomable_start',
+            config: {
+              type: 'SliderControl',
+              label: t('Data Zoom Start%'),
+              default: 0,
+              min: 0,
+              step: 1,
+              renderTrigger: true,
+              description: t('Data zoom starting point %'),
+              visibility: ({ controls }: ControlPanelsContainerProps) =>
+                Boolean(controls?.zoomable?.value),
+            },
+          },
+          {
+            name: 'zoomable_end',
+            config: {
+              type: 'SliderControl',
+              label: t('Data Zoom End%'),
+              default: 100,
+              max: 100,
+              step: 1,
+              renderTrigger: true,
+              description: t('Data zoom ending point %'),
+              visibility: ({ controls }: ControlPanelsContainerProps) =>
+                Boolean(controls?.zoomable?.value),
             },
           },
         ],
