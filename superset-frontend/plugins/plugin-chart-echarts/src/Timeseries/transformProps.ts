@@ -17,7 +17,7 @@
  * under the License.
  */
 /* eslint-disable camelcase */
-import { filter, invert } from 'lodash';
+import { invert } from 'lodash';
 import {
   AnnotationLayer,
   CategoricalColorNamespace,
