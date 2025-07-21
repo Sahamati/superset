@@ -258,6 +258,20 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: 'enable_max_interval',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Force Time Grain as Max Interval'),
+              renderTrigger: true,
+              default: false,
+              description: t('Forces selected Time Grain as the maximum interval for X Axis Labels'),
+              visibility: ({ controls }: ControlPanelsContainerProps) =>
+                Boolean(controls?.time_grain_sqla?.value),
+            },
+          },
+        ],
         ...richTooltipSection,
         // eslint-disable-next-line react/jsx-key
         [<ControlSubSectionHeader>{t('Y Axis')}</ControlSubSectionHeader>],

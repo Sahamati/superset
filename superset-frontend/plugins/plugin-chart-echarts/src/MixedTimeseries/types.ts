@@ -56,6 +56,7 @@ export type EchartsMixedTimeseriesFormData = QueryFormData & {
   truncateYAxis: boolean;
   truncateYAxisSecondary: boolean;
   timeGrainSqla?: TimeGranularity;
+  enableMaxInterval?: boolean;
   tooltipTimeFormat?: string;
   zoomable: boolean;
   zoomableStart: number;
