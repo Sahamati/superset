@@ -80,6 +80,7 @@ export type EchartsTimeseriesFormData = QueryFormData & {
   xAxisTimeFormat?: string;
   xScaleInterval: number;
   timeGrainSqla?: TimeGranularity;
+  enableMaxInterval?: boolean;
   yAxisBounds: [number | undefined | null, number | undefined | null];
   yScaleInterval: number;
   zoomable: boolean;

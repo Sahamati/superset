@@ -196,6 +196,7 @@ export default function transformProps(
     yAxisTitlePosition,
     sliceId,
     timeGrainSqla,
+    enableMaxInterval,
     percentageThreshold,
     metrics = [],
     metricsB = [],
@@ -504,9 +505,13 @@ export default function transformProps(
         rotate: xAxisLabelRotation,
       },
       minInterval:
-        xAxisType === 'time' && timeGrainSqla
+        xAxisType === 'time' && timeGrainSqla && !enableMaxInterval
           ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
           : 0,
+      maxInterval:
+        xAxisType === 'time' && timeGrainSqla && enableMaxInterval
+          ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
+          : undefined,
     },
     yAxis: [
       {

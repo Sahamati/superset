@@ -156,6 +156,7 @@ export default function transformProps(
     sortSeriesType,
     sortSeriesAscending,
     timeGrainSqla,
+    enableMaxInterval,
     timeCompare,
     stack,
     tooltipTimeFormat,
@@ -455,9 +456,13 @@ export default function transformProps(
       interval: xScaleInterval === -1 ? 'auto' : xScaleInterval - 1,
     },
     minInterval:
-      xAxisType === 'time' && timeGrainSqla
+      xAxisType === 'time' && timeGrainSqla && !enableMaxInterval
         ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
         : 0,
+    maxInterval:
+      xAxisType === 'time' && timeGrainSqla && enableMaxInterval
+        ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
+        : undefined,
   };
   let yAxis: any = {
     ...defaultYAxis,
