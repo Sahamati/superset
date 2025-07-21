@@ -210,9 +210,13 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
           label: t('Force Time Grain as Max Interval'),
           renderTrigger: true,
           default: false,
-          description: t('Forces selected Time Grain as the maximum interval for X Axis Labels'),
+          description: t(
+            'Forces selected Time Grain as the maximum interval for X Axis Labels',
+          ),
           visibility: ({ controls }: ControlPanelsContainerProps) =>
-            Boolean(controls?.time_grain_sqla?.value) && isXAxis ? isVertical(controls) : isHorizontal(controls),
+            Boolean(controls?.time_grain_sqla?.value) && isXAxis
+              ? isVertical(controls)
+              : isHorizontal(controls),
         },
       },
     ],

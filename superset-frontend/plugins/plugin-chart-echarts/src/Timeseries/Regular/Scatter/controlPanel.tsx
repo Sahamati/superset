@@ -209,7 +209,9 @@ const config: ControlPanelConfig = {
               label: t('Force Time Grain as Max Interval'),
               renderTrigger: true,
               default: false,
-              description: t('Forces selected Time Grain as the maximum interval for X Axis Labels. Works only if Time Grain is selected.'),
+              description: t(
+                'Forces selected Time Grain as the maximum interval for X Axis Labels. Works only if Time Grain is selected.',
+              ),
               visibility: ({ controls }: ControlPanelsContainerProps) =>
                 Boolean(controls?.time_grain_sqla?.value),
             },
