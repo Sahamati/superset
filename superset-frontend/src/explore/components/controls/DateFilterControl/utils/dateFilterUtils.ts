@@ -26,14 +26,18 @@ import {
   customTimeRangeDecode,
 } from '.';
 import { FrameType } from '../types';
+import { convertUTCToIST } from './istTimezoneUtils';
 
 export const SEPARATOR = ' : ';
 
 export const buildTimeRangeString = (since: string, until: string): string =>
   `${since}${SEPARATOR}${until}`;
 
-const formatDateEndpoint = (dttm: string, isStart?: boolean): string =>
-  dttm.replace('T00:00:00', '') || (isStart ? '-∞' : '∞');
+const formatDateEndpoint = (dttm: string, isStart?: boolean): string => {
+  const cleaned = dttm.replace('T00:00:00', '') || (isStart ? '-∞' : '∞');
+  // Convert UTC to IST for display
+  return convertUTCToIST(cleaned);
+};
 
 export const formatTimeRange = (
   timeRange: string,
