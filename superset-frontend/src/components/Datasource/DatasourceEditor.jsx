@@ -976,10 +976,10 @@ class DatasourceEditor extends React.PureComponent {
         />
         <Field
           fieldKey="offset"
-          label={t('Hours offset')}
-          control={<TextControl controlId="offset" />}
+          label={t('Time offset (minutes)')}
+          control={<TextControl controlId="offset" type="number" />}
           description={t(
-            'The number of hours, negative or positive, to shift the time column. This can be used to move UTC time to local time.',
+            'The number of minutes, negative or positive, to shift the time column. This can be used to move UTC time to local time. For example, use 330 for UTC+5:30 or -330 for UTC-5:30.',
           )}
         />
         {this.state.isSqla && (
