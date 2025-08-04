@@ -33,8 +33,8 @@ from superset.models.dashboard import Dashboard
 from superset.views.base_api import BaseSupersetModelRestApi, requires_json  # noqa: F401
 from superset.utils import json
 
+from tests.conftest import with_config
 from tests.integration_tests.base_tests import SupersetTestCase
-from tests.integration_tests.conftest import with_config
 from tests.integration_tests.constants import ADMIN_USERNAME
 
 
@@ -231,7 +231,7 @@ class ApiOwnersTestCaseMixin:
             return query.filter_by(username="alpha")
 
         with patch.dict(
-            "superset.views.filters.current_app.config",
+            "flask.current_app.config",
             {"EXTRA_RELATED_QUERY_FILTERS": {"user": _base_filter}},
         ):
             uri = f"api/v1/{self.resource_name}/related/owners"

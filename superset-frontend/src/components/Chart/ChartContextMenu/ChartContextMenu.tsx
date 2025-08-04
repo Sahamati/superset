@@ -41,9 +41,9 @@ import {
   useTheme,
 } from '@superset-ui/core';
 import { RootState } from 'src/dashboard/types';
-import { Menu } from 'src/components/Menu';
+import { Menu } from '@superset-ui/core/components/Menu';
 import { usePermissions } from 'src/hooks/usePermissions';
-import { Dropdown } from 'src/components/Dropdown';
+import { Dropdown } from '@superset-ui/core/components';
 import { updateDataMask } from 'src/dataMask/actions';
 import DrillByModal from 'src/components/Chart/DrillBy/DrillByModal';
 import { useVerboseMap } from 'src/hooks/apiResources/datasets';
@@ -63,7 +63,7 @@ export enum ContextMenuItem {
 export interface ChartContextMenuProps {
   id: number;
   formData: QueryFormData;
-  onSelection: () => void;
+  onSelection: (args?: any) => void;
   onClose: () => void;
   additionalConfig?: {
     crossFilter?: Record<string, any>;
@@ -122,6 +122,12 @@ const ChartContextMenu = (
   const [showDrillByModal, setShowDrillByModal] = useState(false);
   const [dataset, setDataset] = useState<Dataset>();
   const verboseMap = useVerboseMap(dataset);
+
+  const closeContextMenu = useCallback(() => {
+    setVisible(false);
+    setOpenKeys([]);
+    onClose();
+  }, [onClose]);
 
   const handleDrillBy = useCallback((column: Column, dataset: Dataset) => {
     setDrillByColumn(column);
@@ -264,6 +270,7 @@ const ChartContextMenu = (
       <DrillByMenuItems
         drillByConfig={filters?.drillBy}
         onSelection={onSelection}
+        onCloseMenu={closeContextMenu}
         formData={formData}
         contextMenuY={clientY}
         submenuIndex={submenuIndex}
@@ -304,13 +311,14 @@ const ChartContextMenu = (
   return ReactDOM.createPortal(
     <>
       <Dropdown
-        dropdownRender={() => (
+        popupRender={() => (
           <Menu
             className="chart-context-menu"
             data-test="chart-context-menu"
             onOpenChange={setOpenKeys}
             onClick={() => {
               setVisible(false);
+              setOpenKeys([]);
               onClose();
             }}
           >

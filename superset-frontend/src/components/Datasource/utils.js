@@ -28,10 +28,10 @@ export function recurseReactClone(children, type, propExtender) {
    */
   return Children.map(children, child => {
     let newChild = child;
-    if (child && child.type.name === type.name) {
+    if (child && child.type && child.type.name === type.name) {
       newChild = cloneElement(child, propExtender(child));
     }
-    if (newChild && newChild.props.children) {
+    if (newChild && newChild.props && newChild.props.children) {
       newChild = cloneElement(newChild, {
         children: recurseReactClone(
           newChild.props.children,
@@ -56,8 +56,11 @@ export function updateColumns(prevCols, newCols, addSuccessToast) {
     added: [],
     modified: [],
     removed: prevCols
-      .map(col => col.column_name)
-      .filter(col => !databaseColumnNames.includes(col)),
+      .filter(
+        col =>
+          !(col.expression || databaseColumnNames.includes(col.column_name)),
+      )
+      .map(col => col.column_name),
     finalColumns: [],
   };
   newCols.forEach(col => {
@@ -89,11 +92,19 @@ export function updateColumns(prevCols, newCols, addSuccessToast) {
       columnChanges.finalColumns.push(currentCol);
     }
   });
+  // push all calculated columns
+  prevCols
+    .filter(col => col.expression)
+    .forEach(col => {
+      columnChanges.finalColumns.push(col);
+    });
+
   if (columnChanges.modified.length) {
     addSuccessToast(
       tn(
         'Modified 1 column in the virtual dataset',
         'Modified %s columns in the virtual dataset',
+        columnChanges.modified.length,
         columnChanges.modified.length,
       ),
     );
@@ -104,6 +115,7 @@ export function updateColumns(prevCols, newCols, addSuccessToast) {
         'Removed 1 column from the virtual dataset',
         'Removed %s columns from the virtual dataset',
         columnChanges.removed.length,
+        columnChanges.removed.length,
       ),
     );
   }
@@ -112,6 +124,7 @@ export function updateColumns(prevCols, newCols, addSuccessToast) {
       tn(
         'Added 1 new column to the virtual dataset',
         'Added %s new columns to the virtual dataset',
+        columnChanges.added.length,
         columnChanges.added.length,
       ),
     );

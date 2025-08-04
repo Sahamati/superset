@@ -31,13 +31,13 @@ from flask import current_app, g
 from flask_appbuilder.security.sqla.models import Role
 from superset.daos.datasource import DatasourceDAO  # noqa: F401
 from superset.models.dashboard import Dashboard
-from superset import app, appbuilder, db, security_manager, viz
+from superset import appbuilder, db, security_manager, viz
 from superset.connectors.sqla.models import SqlaTable
 from superset.errors import ErrorLevel, SupersetError, SupersetErrorType
 from superset.exceptions import SupersetSecurityException
 from superset.models.core import Database
 from superset.models.slice import Slice
-from superset.sql_parse import Table
+from superset.sql.parse import Table
 from superset.utils.core import (
     DatasourceType,
     backend,
@@ -62,6 +62,11 @@ from tests.integration_tests.fixtures.birth_names_dashboard import (
 from tests.integration_tests.fixtures.world_bank_dashboard import (
     load_world_bank_dashboard_with_slices,  # noqa: F401
     load_world_bank_data,  # noqa: F401
+)
+from tests.integration_tests.fixtures.users import (
+    create_gamma_user_group,  # noqa: F401
+    create_user_group_with_dar,  # noqa: F401
+    create_gamma_user_group_with_dar,  # noqa: F401
 )
 
 NEW_SECURITY_CONVERGE_VIEWS = (
@@ -1533,6 +1538,7 @@ class TestRolePermission(SupersetTestCase):
             ["AuthDBView", "login"],
             ["AuthDBView", "logout"],
             ["CurrentUserRestApi", "get_me"],
+            ["CurrentUserRestApi", "update_me"],
             ["CurrentUserRestApi", "get_my_roles"],
             ["UserRestApi", "avatar"],
             # TODO (embedded) remove Dashboard:embedded after uuids have been shipped
@@ -1545,7 +1551,12 @@ class TestRolePermission(SupersetTestCase):
             ["SecurityApi", "login"],
             ["SecurityApi", "refresh"],
             ["SupersetIndexView", "index"],
+            ["SupersetIndexView", "patch_flask_locale"],
             ["DatabaseRestApi", "oauth2"],
+            ["SupersetAuthView", "login"],
+            ["SupersetAuthView", "logout"],
+            ["SupersetRegisterUserView", "register"],
+            ["SupersetRegisterUserView", "activation"],
         ]
         unsecured_views = []
         for view_class in appbuilder.baseviews:
@@ -1871,11 +1882,57 @@ class TestSecurityManager(SupersetTestCase):
                     }
                 )
 
-    def test_get_user_roles(self):
+    def test_get_admin_user_roles(self):
         admin = security_manager.find_user("admin")
         with override_user(admin):
             roles = security_manager.get_user_roles()
             assert admin.roles == roles
+
+    def test_get_gamma_user_roles(self):
+        admin = security_manager.find_user("gamma")
+        with override_user(admin):
+            roles = security_manager.get_user_roles()
+            assert admin.roles == roles
+
+    @pytest.mark.usefixtures("create_gamma_user_group")
+    def test_get_user_roles_with_groups(self):
+        user = security_manager.find_user("gamma_with_groups")
+        with override_user(user):
+            roles = security_manager.get_user_roles()
+            assert user.groups[0].roles == roles
+
+    @pytest.mark.usefixtures("create_gamma_user_group_with_dar")
+    def test_get_user_roles_with_groups_dar(self):
+        user = security_manager.find_user("gamma_with_groups")
+        with override_user(user):
+            role_names = [role.name for role in security_manager.get_user_roles()]
+            assert "Gamma" in role_names
+            assert "dar" in role_names
+            assert len(role_names) == 2
+
+    @pytest.mark.usefixtures("create_user_group_with_dar")
+    def test_user_view_menu_names_with_groups_dar(self):
+        user = security_manager.find_user("gamma_with_groups")
+        with override_user(user):
+            assert security_manager.user_view_menu_names("datasource_access") == {
+                "[examples].[birth_names](id:1)]"
+            }
+
+    @pytest.mark.usefixtures("create_gamma_user_group_with_dar")
+    def test_gamma_user_view_menu_names_with_groups_dar(self):
+        user = security_manager.find_user("gamma_with_groups")
+        with override_user(user):
+            # assert pvm for dar role
+            assert security_manager.user_view_menu_names("datasource_access") == {
+                "[examples].[birth_names](id:1)]"
+            }
+            # assert pvm for gamma role
+            assert security_manager.user_view_menu_names("can_external_metadata") == {
+                "Datasource"
+            }
+            assert security_manager.user_view_menu_names("can_recent_activity") == {
+                "Log"
+            }
 
     def test_get_anonymous_roles(self):
         with override_user(security_manager.get_anonymous_user()):
@@ -2130,7 +2187,7 @@ class TestGuestTokens(SupersetTestCase):
     def test_create_guest_access_token_callable_audience(self, get_time_mock):
         now = time.time()
         get_time_mock.return_value = now
-        app.config["GUEST_TOKEN_JWT_AUDIENCE"] = Mock(return_value="cool_code")
+        self.app.config["GUEST_TOKEN_JWT_AUDIENCE"] = Mock(return_value="cool_code")
 
         user = {"username": "test_guest"}
         resources = [{"some": "resource"}]
@@ -2143,7 +2200,7 @@ class TestGuestTokens(SupersetTestCase):
             algorithms=[self.app.config["GUEST_TOKEN_JWT_ALGO"]],
             audience="cool_code",
         )
-        app.config["GUEST_TOKEN_JWT_AUDIENCE"].assert_called_once()
+        self.app.config["GUEST_TOKEN_JWT_AUDIENCE"].assert_called_once()
         assert "cool_code" == decoded_token["aud"]
         assert "guest" == decoded_token["type"]
-        app.config["GUEST_TOKEN_JWT_AUDIENCE"] = None
+        self.app.config["GUEST_TOKEN_JWT_AUDIENCE"] = None

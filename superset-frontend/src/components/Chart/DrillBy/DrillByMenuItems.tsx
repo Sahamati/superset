@@ -26,13 +26,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Menu } from 'src/components/Menu';
+import { Menu } from '@superset-ui/core/components/Menu';
 import {
   BaseFormData,
   Behavior,
   Column,
   ContextMenuFilters,
-  FAST_DEBOUNCE,
   JsonResponse,
   css,
   ensureIsArray,
@@ -42,21 +41,20 @@ import {
   t,
   useTheme,
 } from '@superset-ui/core';
+import { Constants, Input, Loading } from '@superset-ui/core/components';
 import rison from 'rison';
 import { debounce } from 'lodash';
 import { FixedSizeList as List } from 'react-window';
-import Icons from 'src/components/Icons';
-import { Input } from 'src/components/Input';
+import { Icons } from '@superset-ui/core/components/Icons';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
-import Loading from 'src/components/Loading';
 import {
   cachedSupersetGet,
   supersetGetCache,
 } from 'src/utils/cachedSupersetGet';
-import { InputRef } from 'antd-v5';
+import { InputRef } from 'antd';
 import { MenuItemTooltip } from '../DisabledMenuItemTooltip';
 import { getSubmenuYOffset } from '../utils';
-import { MenuItemWithTruncation } from '../MenuItemWithTruncation';
+import { VirtualizedMenuItem } from '../MenuItemWithTruncation';
 import { Dataset } from '../types';
 
 const SUBMENU_HEIGHT = 200;
@@ -70,6 +68,7 @@ export interface DrillByMenuItemsProps {
   submenuIndex?: number;
   onSelection?: (...args: any) => void;
   onClick?: (event: MouseEvent) => void;
+  onCloseMenu?: () => void;
   openNewModal?: boolean;
   excludedColumns?: Column[];
   open: boolean;
@@ -102,6 +101,7 @@ export const DrillByMenuItems = ({
   submenuIndex = 0,
   onSelection = () => {},
   onClick = () => {},
+  onCloseMenu = () => {},
   excludedColumns,
   openNewModal = true,
   open,
@@ -126,6 +126,7 @@ export const DrillByMenuItems = ({
       if (openNewModal && onDrillBy && dataset) {
         onDrillBy(column, dataset);
       }
+      onCloseMenu();
     },
     [drillByConfig, onClick, onSelection, openNewModal, onDrillBy, dataset],
   );
@@ -204,7 +205,7 @@ export const DrillByMenuItems = ({
     () =>
       debounce((value: string) => {
         setDebouncedSearchInput(value);
-      }, FAST_DEBOUNCE),
+      }, Constants.FAST_DEBOUNCE),
     [],
   );
 
@@ -266,15 +267,14 @@ export const DrillByMenuItems = ({
     const { columns, ...rest } = data;
     const column = columns[index];
     return (
-      <MenuItemWithTruncation
-        menuKey={`drill-by-item-${column.column_name}`}
+      <VirtualizedMenuItem
         tooltipText={column.verbose_name || column.column_name}
         onClick={e => handleSelection(e, column)}
         style={style}
         {...rest}
       >
         {column.verbose_name || column.column_name}
-      </MenuItemWithTruncation>
+      </VirtualizedMenuItem>
     );
   };
 
@@ -292,9 +292,9 @@ export const DrillByMenuItems = ({
             <Input
               ref={ref}
               prefix={
-                <Icons.Search
+                <Icons.SearchOutlined
                   iconSize="l"
-                  iconColor={theme.colors.grayscale.light1}
+                  iconColor={theme.colorIcon}
                 />
               }
               onChange={e => {
@@ -310,7 +310,7 @@ export const DrillByMenuItems = ({
               css={css`
                 width: auto;
                 max-width: 100%;
-                margin: ${theme.gridUnit * 2}px ${theme.gridUnit * 3}px;
+                margin: ${theme.sizeUnit * 2}px ${theme.sizeUnit * 3}px;
                 box-shadow: none;
               `}
               value={searchInput}
@@ -319,7 +319,7 @@ export const DrillByMenuItems = ({
           {isLoadingColumns ? (
             <div
               css={css`
-                padding: ${theme.gridUnit * 3}px 0;
+                padding: ${theme.sizeUnit * 3}px 0;
               `}
             >
               <Loading position="inline-centered" />

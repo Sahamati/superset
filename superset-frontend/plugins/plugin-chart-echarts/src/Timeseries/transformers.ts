@@ -171,7 +171,7 @@ export function transformSeries(
     timeShiftColor?: boolean;
   },
 ): SeriesOption | undefined {
-  const { name } = series;
+  const { name, data } = series;
   const {
     area,
     connectNulls,
@@ -226,7 +226,7 @@ export function transformSeries(
     stackId = forecastSeries.name;
   } else if (stack && isObservation) {
     // the suffix of the observation series is '' (falsy), which disables
-    // stacking. Therefore we need to set something that is truthy.
+    // stacking. Therefore, we need to set something that is truthy.
     stackId = getTimeCompareStackId('obs', timeCompare, name);
   } else if (stack && isTrend) {
     stackId = getTimeCompareStackId(forecastSeries.type, timeCompare, name);
@@ -290,6 +290,9 @@ export function transformSeries(
       : { ...opts.lineStyle, opacity };
   return {
     ...series,
+    ...(Array.isArray(data) && seriesType === 'bar' && !stack
+      ? { data: transformNegativeLabelsPosition(series, isHorizontal) }
+      : null),
     connectNulls,
     queryIndex,
     yAxisIndex,
@@ -322,6 +325,15 @@ export function transformSeries(
       show: !!showValue,
       position: isHorizontal ? 'right' : 'top',
       formatter: (params: any) => {
+        // don't show confidence band value labels, as they're already visible on the tooltip
+        if (
+          [
+            ForecastSeriesEnum.ForecastUpper,
+            ForecastSeriesEnum.ForecastLower,
+          ].includes(forecastSeries.type)
+        ) {
+          return '';
+        }
         const { value, dataIndex, seriesIndex, seriesName } = params;
         const numericValue = isHorizontal ? value[0] : value[1];
         const isSelectedLegend = !legendState || legendState[seriesName];
@@ -617,4 +629,31 @@ export function getPadding(
     },
     isHorizontal,
   );
+}
+
+export function transformNegativeLabelsPosition(
+  series: SeriesOption,
+  isHorizontal: boolean,
+): TimeseriesDataRecord[] {
+  /*
+   * Adjusts label position for negative values in bar series
+   * @param series - Array of series options
+   * @param isHorizontal - Whether chart is horizontal
+   * @returns data with adjusted label positions for negative values
+   */
+  const transformValue = (value: any) => {
+    const [xValue, yValue] = Array.isArray(value) ? value : [null, null];
+    const axisValue = isHorizontal ? xValue : yValue;
+
+    return axisValue < 0
+      ? {
+          value,
+          label: {
+            position: 'outside',
+          },
+        }
+      : value;
+  };
+
+  return (series.data as TimeseriesDataRecord[]).map(transformValue);
 }

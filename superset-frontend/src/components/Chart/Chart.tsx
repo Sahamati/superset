@@ -24,16 +24,14 @@ import {
   logging,
   QueryFormData,
   styled,
-  ErrorTypeEnum,
   t,
   SqlaFormData,
   ClientErrorObject,
   ChartDataResponse,
 } from '@superset-ui/core';
 import { PLACEHOLDER_DATASOURCE } from 'src/dashboard/constants';
-import Loading from 'src/components/Loading';
-import { EmptyState } from 'src/components/EmptyState';
-import ErrorBoundary from 'src/components/ErrorBoundary';
+import { EmptyState, Loading } from '@superset-ui/core/components';
+import { ErrorBoundary } from 'src/components';
 import { Logger, LOG_ACTIONS_RENDER_CHART } from 'src/logger/LogUtils';
 import { URL_PARAMS } from 'src/constants';
 import { getUrlParam } from 'src/utils/urlUtils';
@@ -137,7 +135,7 @@ const Styles = styled.div<{ height: number; width?: number }>`
 
   .chart-tooltip {
     opacity: 0.75;
-    font-size: ${({ theme }) => theme.typography.sizes.s}px;
+    font-size: ${({ theme }) => theme.fontSizeSM}px;
   }
 
   .slice_container {
@@ -152,7 +150,7 @@ const Styles = styled.div<{ height: number; width?: number }>`
     }
 
     .alert {
-      margin: ${({ theme }) => theme.gridUnit * 2}px;
+      margin: ${({ theme }) => theme.sizeUnit * 2}px;
     }
   }
 `;
@@ -168,7 +166,7 @@ const LoadingDiv = styled.div`
 const MessageSpan = styled.span`
   display: block;
   text-align: center;
-  margin: ${({ theme }) => theme.gridUnit * 4}px auto;
+  margin: ${({ theme }) => theme.sizeUnit * 4}px auto;
   width: fit-content;
   color: ${({ theme }) => theme.colors.grayscale.base};
 `;
@@ -240,15 +238,7 @@ class Chart extends PureComponent<ChartProps, {}> {
       height,
       datasetsStatus,
     } = this.props;
-    let error = queryResponse?.errors?.[0];
-    if (error === undefined) {
-      error = {
-        error_type: ErrorTypeEnum.FRONTEND_NETWORK_ERROR,
-        level: 'error',
-        message: t('Check your network connection'),
-        extra: null,
-      };
-    }
+    const error = queryResponse?.errors?.[0];
     const message = chartAlert || queryResponse?.message;
 
     // if datasource is still loading, don't render JS errors
