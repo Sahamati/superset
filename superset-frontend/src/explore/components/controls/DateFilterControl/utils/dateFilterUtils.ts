@@ -26,29 +26,31 @@ import {
   customTimeRangeDecode,
 } from '.';
 import { FrameType } from '../types';
-import { convertUTCToIST } from './istTimezoneUtils';
+import { convertUTCToTimezone, TimezoneType } from './timezoneUtils';
 
 export const SEPARATOR = ' : ';
 
 export const buildTimeRangeString = (since: string, until: string): string =>
   `${since}${SEPARATOR}${until}`;
 
-const formatDateEndpoint = (dttm: string, isStart?: boolean): string => {
+const formatDateEndpoint = (dttm: string, timezone: TimezoneType = 'UTC', isStart?: boolean): string => {
   const cleaned = dttm.replace('T00:00:00', '') || (isStart ? '-∞' : '∞');
-  // Convert UTC to IST for display
-  return convertUTCToIST(cleaned);
+  // Convert UTC to specified timezone for display
+  return convertUTCToTimezone(cleaned, timezone);
 };
 
 export const formatTimeRange = (
   timeRange: string,
   columnPlaceholder = 'col',
+  timezone: TimezoneType = 'UTC',
 ) => {
   const splitDateRange = timeRange.split(SEPARATOR);
   if (splitDateRange.length === 1) return timeRange;
   return `${formatDateEndpoint(
     splitDateRange[0],
+    timezone,
     true,
-  )} ≤ ${columnPlaceholder} < ${formatDateEndpoint(splitDateRange[1])}`;
+  )} ≤ ${columnPlaceholder} < ${formatDateEndpoint(splitDateRange[1], timezone)}`;
 };
 
 export const guessFrame = (timeRange: string): FrameType => {
@@ -70,6 +72,7 @@ export const guessFrame = (timeRange: string): FrameType => {
 export const fetchTimeRange = async (
   timeRange: string,
   columnPlaceholder = 'col',
+  timezone: TimezoneType = 'UTC',
 ) => {
   const query = rison.encode_uri(timeRange);
   const endpoint = `/api/v1/time_range/?q=${query}`;
@@ -80,7 +83,7 @@ export const fetchTimeRange = async (
       response?.json?.result?.until || '',
     );
     return {
-      value: formatTimeRange(timeRangeString, columnPlaceholder),
+      value: formatTimeRange(timeRangeString, columnPlaceholder, timezone),
     };
   } catch (response) {
     const clientError = await getClientErrorObject(response);

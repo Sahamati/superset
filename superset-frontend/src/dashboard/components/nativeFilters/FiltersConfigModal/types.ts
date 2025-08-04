@@ -45,6 +45,7 @@ export interface NativeFiltersFormItem {
   adhoc_filters?: AdhocFilter[];
   time_range?: string;
   granularity_sqla?: string;
+  timezone?: string;
   type: typeof NativeFilterType.NATIVE_FILTER;
   description: string;
 }
