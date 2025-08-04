@@ -74,19 +74,6 @@ const styledDisabled = (theme: SupersetTheme) => css`
   }
 `;
 
-const UsernameMenuItem = styled(Menu.Item)`
-  a {
-    max-width: ${({ theme }) => theme.gridUnit * 30}px; /* Adjust as needed */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: ${({ theme }) => theme.colors.primary.base} !important;
-    &:hover {
-      color: ${({ theme }) => theme.colors.primary.dark1} !important;
-    }
-  }
-`;
-
 const StyledDiv = styled.div<{ align: string }>`
   display: flex;
   flex-direction: row;
@@ -534,18 +521,24 @@ const RightMenu = ({
             languages={navbarRight.languages}
           />
         )}
-        {!navbarRight.user_is_anonymous &&(
-          <SubMenu
-            title={t('\u00A0')}
-            icon={<Icons.User iconSize='l' />}
-          >
+        {!navbarRight.user_is_anonymous && (
+          <SubMenu title={t('\u00A0')} icon={<Icons.User iconSize="l" />}>
             <Menu.ItemGroup key="user-section" title={t('User')}>
               <Menu.Item key="username">
                 {navbarRight.user_profile_url && (
-                  <a href={navbarRight.user_profile_url} style = {{display: 'inline-block', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
-                    {(user.firstName || user.lastName)
-                    ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
-                    : 'Profile'}
+                  <a
+                    href={navbarRight.user_profile_url}
+                    style={{
+                      display: 'inline-block',
+                      maxWidth: '120px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {user.firstName || user.lastName
+                      ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
+                      : 'Profile'}
                   </a>
                 )}
               </Menu.Item>

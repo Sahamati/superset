@@ -33,7 +33,11 @@ export const SEPARATOR = ' : ';
 export const buildTimeRangeString = (since: string, until: string): string =>
   `${since}${SEPARATOR}${until}`;
 
-const formatDateEndpoint = (dttm: string, timezone: TimezoneType = 'UTC', isStart?: boolean): string => {
+const formatDateEndpoint = (
+  dttm: string,
+  timezone: TimezoneType = 'UTC',
+  isStart?: boolean,
+): string => {
   const cleaned = dttm.replace('T00:00:00', '') || (isStart ? '-∞' : '∞');
   // Convert UTC to specified timezone for display
   return convertUTCToTimezone(cleaned, timezone);
@@ -50,7 +54,10 @@ export const formatTimeRange = (
     splitDateRange[0],
     timezone,
     true,
-  )} ≤ ${columnPlaceholder} < ${formatDateEndpoint(splitDateRange[1], timezone)}`;
+  )} ≤ ${columnPlaceholder} < ${formatDateEndpoint(
+    splitDateRange[1],
+    timezone,
+  )}`;
 };
 
 export const guessFrame = (timeRange: string): FrameType => {
