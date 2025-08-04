@@ -73,6 +73,7 @@ export type CustomRangeDecodeType = {
 };
 
 export type CommonRangeType =
+  | '24 hours ago : now'
   | 'Last day'
   | 'Last week'
   | 'Last month'

@@ -53,6 +53,7 @@ import {
   AdvancedFrame,
   DateLabel,
 } from './components';
+import { COMMON_RANGE_OPTIONS } from './utils/constants';
 
 const StyledRangeType = styled(Select)`
   width: 272px;
@@ -174,7 +175,10 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
   const [tooltipTitle, setTooltipTitle] = useState<ReactNode | null>(value);
   const theme = useTheme();
   const [labelRef, labelIsTruncated] = useCSSTextTruncation<HTMLSpanElement>();
-
+  const commonOption = COMMON_RANGE_OPTIONS.find(
+    option => option.value === value,
+  );
+const displayLabel = commonOption ? commonOption.label : value;
   useEffect(() => {
     if (value === NO_TIME_RANGE) {
       setActualTimeRange(NO_TIME_RANGE);
@@ -204,7 +208,8 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
           guessedFrame === 'Calendar' ||
           guessedFrame === 'No filter'
         ) {
-          setActualTimeRange(value);
+          setActualTimeRange(guessedFrame === 'Common' ? displayLabel : value,
+          );
           setTooltipTitle(
             getTooltipTitle(labelIsTruncated, value, actualRange),
           );
