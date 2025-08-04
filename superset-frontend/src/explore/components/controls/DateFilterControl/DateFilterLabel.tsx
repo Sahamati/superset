@@ -178,7 +178,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
   const commonOption = COMMON_RANGE_OPTIONS.find(
     option => option.value === value,
   );
-const displayLabel = commonOption ? commonOption.label : value;
+  const displayLabel = commonOption ? commonOption.label : value;
   useEffect(() => {
     if (value === NO_TIME_RANGE) {
       setActualTimeRange(NO_TIME_RANGE);
@@ -186,13 +186,14 @@ const displayLabel = commonOption ? commonOption.label : value;
       setValidTimeRange(true);
       return;
     }
-    fetchTimeRange(value, 'col', timezone).then(({ value: actualRange, error }) => {
-      if (error) {
-        setEvalResponse(error || '');
-        setValidTimeRange(false);
-        setTooltipTitle(value || null);
-      } else {
-        /*
+    fetchTimeRange(value, 'col', timezone).then(
+      ({ value: actualRange, error }) => {
+        if (error) {
+          setEvalResponse(error || '');
+          setValidTimeRange(false);
+          setTooltipTitle(value || null);
+        } else {
+          /*
           HRT == human readable text
           ADR == actual datetime range
           +--------------+------+----------+--------+----------+-----------+
@@ -203,27 +204,29 @@ const displayLabel = commonOption ? commonOption.label : value;
           | tooltip      | ADR  | ADR      | HRT    | HRT      |   ADR     |
           +--------------+------+----------+--------+----------+-----------+
         */
-        if (
-          guessedFrame === 'Common' ||
-          guessedFrame === 'Calendar' ||
-          guessedFrame === 'No filter'
-        ) {
-          setActualTimeRange(guessedFrame === 'Common' ? displayLabel : value,
-          );
-          setTooltipTitle(
-            getTooltipTitle(labelIsTruncated, value, actualRange),
-          );
-        } else {
-          setActualTimeRange(actualRange || '');
-          setTooltipTitle(
-            getTooltipTitle(labelIsTruncated, actualRange, value),
-          );
+          if (
+            guessedFrame === 'Common' ||
+            guessedFrame === 'Calendar' ||
+            guessedFrame === 'No filter'
+          ) {
+            setActualTimeRange(
+              guessedFrame === 'Common' ? displayLabel : value,
+            );
+            setTooltipTitle(
+              getTooltipTitle(labelIsTruncated, value, actualRange),
+            );
+          } else {
+            setActualTimeRange(actualRange || '');
+            setTooltipTitle(
+              getTooltipTitle(labelIsTruncated, actualRange, value),
+            );
+          }
+          setValidTimeRange(true);
         }
-        setValidTimeRange(true);
-      }
-      setLastFetchedTimeRange(value);
-      setEvalResponse(actualRange || value);
-    });
+        setLastFetchedTimeRange(value);
+        setEvalResponse(actualRange || value);
+      },
+    );
   }, [guessedFrame, labelIsTruncated, labelRef, value, timezone]);
 
   useDebouncedEffect(
@@ -235,16 +238,18 @@ const displayLabel = commonOption ? commonOption.label : value;
         return;
       }
       if (lastFetchedTimeRange !== timeRangeValue) {
-        fetchTimeRange(timeRangeValue, 'col', timezone).then(({ value: actualRange, error }) => {
-          if (error) {
-            setEvalResponse(error || '');
-            setValidTimeRange(false);
-          } else {
-            setEvalResponse(actualRange || '');
-            setValidTimeRange(true);
-          }
-          setLastFetchedTimeRange(timeRangeValue);
-        });
+        fetchTimeRange(timeRangeValue, 'col', timezone).then(
+          ({ value: actualRange, error }) => {
+            if (error) {
+              setEvalResponse(error || '');
+              setValidTimeRange(false);
+            } else {
+              setEvalResponse(actualRange || '');
+              setValidTimeRange(true);
+            }
+            setLastFetchedTimeRange(timeRangeValue);
+          },
+        );
       }
     },
     SLOW_DEBOUNCE,
