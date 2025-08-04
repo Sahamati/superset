@@ -60,7 +60,7 @@ export const convertUTCToTimezone = (
       utcDate = new Date(utcDateTime);
     } else if (utcDateTime.includes('T')) {
       // Assume it's UTC if no timezone indicator
-      utcDate = new Date(utcDateTime + 'Z');
+      utcDate = new Date(`${utcDateTime}Z`);
     } else {
       // Try parsing as is
       utcDate = new Date(utcDateTime);
