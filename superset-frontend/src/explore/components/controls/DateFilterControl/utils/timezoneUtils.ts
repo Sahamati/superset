@@ -18,27 +18,33 @@
  */
 
 /**
- * IST Timezone utilities for date display
+ * Timezone utilities for date display
  * 
- * This module provides utilities for converting UTC datetime strings to Indian Standard Time (IST)
+ * This module provides utilities for converting UTC datetime strings to different timezones
  * for display purposes in Superset filters. The conversion is display-only and does not affect
  * backend data processing, which continues to use UTC.
- * 
- * IST is UTC+5:30 (5 hours and 30 minutes ahead of UTC)
  */
 
+export type TimezoneType = 'UTC' | 'IST';
+
 /**
- * Converts a UTC datetime string to IST format for display
+ * Converts a UTC datetime string to the specified timezone format for display
  * 
  * @param utcDateTime - The UTC datetime string to convert
- * @returns The IST datetime string in YYYY-MM-DDTHH:mm:ss format
+ * @param timezone - The target timezone ('UTC' or 'IST')
+ * @returns The datetime string in YYYY-MM-DDTHH:mm:ss format in the specified timezone
  * 
  * @example
- * convertUTCToIST('2024-01-01T00:00:00') // Returns '2024-01-01T05:30:00'
- * convertUTCToIST('2024-01-01T12:00:00') // Returns '2024-01-01T17:30:00'
+ * convertUTCToTimezone('2024-01-01T00:00:00', 'UTC') // Returns '2024-01-01T00:00:00'
+ * convertUTCToTimezone('2024-01-01T00:00:00', 'IST') // Returns '2024-01-01T05:30:00'
  */
-export const convertUTCToIST = (utcDateTime: string): string => {
+export const convertUTCToTimezone = (utcDateTime: string, timezone: TimezoneType = 'UTC'): string => {
   if (!utcDateTime || utcDateTime === '-∞' || utcDateTime === '∞') {
+    return utcDateTime;
+  }
+
+  // If timezone is UTC, return as is
+  if (timezone === 'UTC') {
     return utcDateTime;
   }
 
@@ -57,16 +63,23 @@ export const convertUTCToIST = (utcDateTime: string): string => {
       utcDate = new Date(utcDateTime);
     }
     
-    // Convert to IST (UTC+5:30)
-    const istDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+    let targetDate: Date;
     
-    // Format as readable IST date using UTC methods to avoid timezone conversion
-    const year = istDate.getUTCFullYear();
-    const month = String(istDate.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(istDate.getUTCDate()).padStart(2, '0');
-    const hours = String(istDate.getUTCHours()).padStart(2, '0');
-    const minutes = String(istDate.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(istDate.getUTCSeconds()).padStart(2, '0');
+    if (timezone === 'IST') {
+      // Convert to IST (UTC+5:30)
+      targetDate = new Date(utcDate.getTime() + (5.5 * 60 * 60 * 1000));
+    } else {
+      // Default to UTC
+      targetDate = utcDate;
+    }
+    
+    // Format as readable date using UTC methods to avoid timezone conversion
+    const year = targetDate.getUTCFullYear();
+    const month = String(targetDate.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(targetDate.getUTCDate()).padStart(2, '0');
+    const hours = String(targetDate.getUTCHours()).padStart(2, '0');
+    const minutes = String(targetDate.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(targetDate.getUTCSeconds()).padStart(2, '0');
     
     const result = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     

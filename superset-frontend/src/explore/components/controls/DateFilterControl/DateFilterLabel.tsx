@@ -157,6 +157,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
     onClosePopover = noOp,
     overlayStyle = 'Popover',
     isOverflowingFilterBar = false,
+    timezone = 'UTC',
   } = props;
   const defaultTimeFilter = useDefaultTimeFilter();
 
@@ -181,7 +182,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
       setValidTimeRange(true);
       return;
     }
-    fetchTimeRange(value).then(({ value: actualRange, error }) => {
+    fetchTimeRange(value, 'col', timezone).then(({ value: actualRange, error }) => {
       if (error) {
         setEvalResponse(error || '');
         setValidTimeRange(false);
@@ -218,7 +219,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
       setLastFetchedTimeRange(value);
       setEvalResponse(actualRange || value);
     });
-  }, [guessedFrame, labelIsTruncated, labelRef, value]);
+  }, [guessedFrame, labelIsTruncated, labelRef, value, timezone]);
 
   useDebouncedEffect(
     () => {
@@ -229,7 +230,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
         return;
       }
       if (lastFetchedTimeRange !== timeRangeValue) {
-        fetchTimeRange(timeRangeValue).then(({ value: actualRange, error }) => {
+        fetchTimeRange(timeRangeValue, 'col', timezone).then(({ value: actualRange, error }) => {
           if (error) {
             setEvalResponse(error || '');
             setValidTimeRange(false);
@@ -242,7 +243,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
       }
     },
     SLOW_DEBOUNCE,
-    [timeRangeValue],
+    [timeRangeValue, timezone],
   );
 
   function onSave() {

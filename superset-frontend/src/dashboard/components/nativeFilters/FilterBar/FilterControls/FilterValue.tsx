@@ -150,6 +150,7 @@ const FilterValue: React.FC<FilterControlProps> = ({
       groupby,
       adhoc_filters,
       time_range,
+      timezone: filter.timezone,
       dashboardId,
     });
     const filterOwnState = filter.dataMask?.ownState || {};

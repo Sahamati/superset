@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TimezoneType } from './utils/timezoneUtils';
+
 export type SelectOptionType = {
   value: string;
   label: string;
@@ -98,4 +100,5 @@ export interface DateFilterControlProps {
   onClosePopover?: () => void;
   overlayStyle?: 'Modal' | 'Popover';
   isOverflowingFilterBar?: boolean;
+  timezone?: TimezoneType;
 }
