@@ -36,11 +36,12 @@ export const FRAME_OPTIONS: SelectOptionType[] = [
 ];
 
 export const COMMON_RANGE_OPTIONS: SelectOptionType[] = [
-  { value: 'Last day', label: t('last day') },
-  { value: 'Last week', label: t('last week') },
-  { value: 'Last month', label: t('last month') },
-  { value: 'Last quarter', label: t('last quarter') },
-  { value: 'Last year', label: t('last year') },
+  { value: '24 hours ago : now', label: t('Last 24 hours') },
+  { value: 'Last day', label: t('Last day') },
+  { value: 'Last week', label: t('Last week') },
+  { value: 'Last month', label: t('Last month') },
+  { value: 'Last quarter', label: t('Last quarter') },
+  { value: 'Last year', label: t('Last year') },
 ];
 export const COMMON_RANGE_VALUES_SET = new Set(
   COMMON_RANGE_OPTIONS.map(({ value }) => value),
@@ -94,6 +95,7 @@ export const UNTIL_MODE_OPTIONS: SelectOptionType[] =
   SINCE_MODE_OPTIONS.slice();
 
 export const COMMON_RANGE_SET: Set<CommonRangeType> = new Set([
+  '24 hours ago : now',
   'Last day',
   'Last week',
   'Last month',

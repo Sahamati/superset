@@ -103,6 +103,7 @@ export default function TimeFilterPlugin(props: PluginFilterTimeProps) {
             unsetFocusedFilter();
           }}
           isOverflowingFilterBar={isOverflowingFilterBar}
+          timezone={props.formData?.timezone as 'UTC' | 'IST'}
         />
       </ControlContainer>
     </TimeFilterStyles>
