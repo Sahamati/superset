@@ -16,7 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export * from './dateParser';
-export * from './constants';
-export * from './dateFilterUtils';
-export * from './timezoneUtils';
+import { QueryObject, SqlaFormData } from '@superset-ui/core';
+import { rankOperator } from '@superset-ui/chart-controls';
+
+const formData: SqlaFormData = {
+  x_axis: 'dttm',
+  metrics: ['sales'],
+  groupby: ['department'],
+  time_range: '2015 : 2016',
+  granularity: 'month',
+  datasource: 'foo',
+  viz_type: 'table',
+  truncate_metric: true,
+};
+const queryObject: QueryObject = {
+  is_timeseries: true,
+  metrics: ['sales'],
+  columns: ['department'],
+  time_range: '2015 : 2016',
+  granularity: 'month',
+  post_processing: [],
+};
+
+test('should add rankOperator', () => {
+  const options = { metric: 'sales', group_by: 'department' };
+  expect(rankOperator(formData, queryObject, options)).toEqual({
+    operation: 'rank',
+    options,
+  });
+});

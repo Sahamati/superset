@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TimezoneType } from './utils/timezoneUtils';
+
 export type SelectOptionType = {
   value: string;
   label: string;
@@ -71,6 +73,7 @@ export type CustomRangeDecodeType = {
 };
 
 export type CommonRangeType =
+  | '24 hours ago : now'
   | 'Last day'
   | 'Last week'
   | 'Last month'
@@ -98,4 +101,5 @@ export interface DateFilterControlProps {
   onClosePopover?: () => void;
   overlayStyle?: 'Modal' | 'Popover';
   isOverflowingFilterBar?: boolean;
+  timezone?: TimezoneType;
 }

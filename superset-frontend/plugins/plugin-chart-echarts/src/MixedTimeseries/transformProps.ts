@@ -162,6 +162,10 @@ export default function transformProps(
     showLegend,
     showValue,
     showValueB,
+    rotateValue,
+    rotateValueB,
+    distanceValue,
+    distanceValueB,
     stack,
     stackB,
     truncateYAxis,
@@ -177,6 +181,8 @@ export default function transformProps(
     yAxisIndexB,
     yAxisTitleSecondary,
     zoomable,
+    zoomableStart = 0,
+    zoomableEnd = 100,
     richTooltip,
     tooltipSortByMetric,
     xAxisLabelRotation,
@@ -190,6 +196,7 @@ export default function transformProps(
     yAxisTitlePosition,
     sliceId,
     timeGrainSqla,
+    enableMaxInterval,
     percentageThreshold,
     metrics = [],
     metricsB = [],
@@ -375,6 +382,8 @@ export default function transformProps(
         areaOpacity: opacity,
         seriesType,
         showValue,
+        rotateValue,
+        distanceValue,
         stack: Boolean(stack),
         yAxisIndex,
         filterState,
@@ -420,6 +429,8 @@ export default function transformProps(
         areaOpacity: opacityB,
         seriesType: seriesTypeB,
         showValue: showValueB,
+        rotateValue: rotateValueB,
+        distanceValue: distanceValueB,
         stack: Boolean(stackB),
         yAxisIndex: yAxisIndexB,
         filterState,
@@ -494,9 +505,13 @@ export default function transformProps(
         rotate: xAxisLabelRotation,
       },
       minInterval:
-        xAxisType === 'time' && timeGrainSqla
+        xAxisType === 'time' && timeGrainSqla && !enableMaxInterval
           ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
           : 0,
+      maxInterval:
+        xAxisType === 'time' && timeGrainSqla && enableMaxInterval
+          ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
+          : undefined,
     },
     yAxis: [
       {
@@ -636,9 +651,11 @@ export default function transformProps(
     dataZoom: zoomable
       ? [
           {
+            id: 'dataZoomX',
             type: 'slider',
-            start: TIMESERIES_CONSTANTS.dataZoomStart,
-            end: TIMESERIES_CONSTANTS.dataZoomEnd,
+            filterMode: 'empty',
+            start: zoomableStart,
+            end: zoomableEnd,
             bottom: TIMESERIES_CONSTANTS.zoomBottom,
           },
         ]
