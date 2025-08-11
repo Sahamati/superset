@@ -150,10 +150,13 @@ export default function transformProps(
     seriesType,
     showLegend,
     showValue,
+    rotateValue,
+    distanceValue,
     sliceId,
     sortSeriesType,
     sortSeriesAscending,
     timeGrainSqla,
+    enableMaxInterval,
     timeCompare,
     stack,
     tooltipTimeFormat,
@@ -166,13 +169,17 @@ export default function transformProps(
     xAxisTimeFormat,
     xAxisTitle,
     xAxisTitleMargin,
+    xScaleInterval,
     yAxisBounds,
     yAxisFormat,
     currencyFormat,
     yAxisTitle,
     yAxisTitleMargin,
     yAxisTitlePosition,
+    yScaleInterval,
     zoomable,
+    zoomableStart,
+    zoomableEnd,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
   const refs: Refs = {};
 
@@ -291,6 +298,8 @@ export default function transformProps(
               labelMap[seriesName]?.[0],
             ) ?? defaultFormatter,
         showValue,
+        rotateValue,
+        distanceValue,
         onlyTotal,
         totalStackedValues: sortedTotalValues,
         showValueIndexes,
@@ -444,11 +453,16 @@ export default function transformProps(
       hideOverlap: true,
       formatter: xAxisFormatter,
       rotate: xAxisLabelRotation,
+      interval: xScaleInterval === -1 ? 'auto' : xScaleInterval - 1,
     },
     minInterval:
-      xAxisType === 'time' && timeGrainSqla
+      xAxisType === 'time' && timeGrainSqla && !enableMaxInterval
         ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
         : 0,
+    maxInterval:
+      xAxisType === 'time' && timeGrainSqla && enableMaxInterval
+        ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
+        : undefined,
   };
   let yAxis: any = {
     ...defaultYAxis,
@@ -464,6 +478,7 @@ export default function transformProps(
         customFormatters,
         defaultFormatter,
       ),
+      interval: yScaleInterval === -1 ? 'auto' : xScaleInterval - 1,
     },
     scale: truncateYAxis,
     name: yAxisTitle,
@@ -561,9 +576,11 @@ export default function transformProps(
     dataZoom: zoomable
       ? [
           {
+            id: 'dataZoomX',
             type: 'slider',
-            start: TIMESERIES_CONSTANTS.dataZoomStart,
-            end: TIMESERIES_CONSTANTS.dataZoomEnd,
+            filterMode: 'empty',
+            start: zoomableStart,
+            end: zoomableEnd,
             bottom: TIMESERIES_CONSTANTS.zoomBottom,
           },
         ]

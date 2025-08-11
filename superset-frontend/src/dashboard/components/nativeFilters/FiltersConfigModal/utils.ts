@@ -129,6 +129,7 @@ export const createHandleSave =
           id,
           adhoc_filters: formInputs.adhoc_filters,
           time_range: formInputs.time_range,
+          timezone: formInputs.timezone,
           controlValues: formInputs.controlValues ?? {},
           granularity_sqla: formInputs.granularity_sqla,
           requiredFirst: Object.values(formInputs.requiredFirst ?? {}).find(

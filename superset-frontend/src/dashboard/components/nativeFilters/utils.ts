@@ -52,6 +52,7 @@ export const getFormData = ({
   sortMetric,
   adhoc_filters,
   time_range,
+  timezone,
   granularity_sqla,
   type,
   dashboardId,
@@ -63,6 +64,7 @@ export const getFormData = ({
   groupby?: string;
   adhoc_filters?: AdhocFilter[];
   time_range?: string;
+  timezone?: string;
 }): Partial<QueryFormData> => {
   const otherProps: {
     datasource?: string;
@@ -96,6 +98,7 @@ export const getFormData = ({
     type,
     dashboardId,
     native_filter_id: id,
+    timezone,
   };
 };
 

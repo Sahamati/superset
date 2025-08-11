@@ -156,6 +156,8 @@ export function transformSeries(
     stack?: StackType;
     yAxisIndex?: number;
     showValue?: boolean;
+    rotateValue?: number;
+    distanceValue?: number;
     onlyTotal?: boolean;
     legendState?: LegendState;
     formatter?: ValueFormatter;
@@ -182,6 +184,8 @@ export function transformSeries(
     stack,
     yAxisIndex = 0,
     showValue,
+    rotateValue = 0,
+    distanceValue = 0,
     onlyTotal,
     formatter,
     legendState,
@@ -333,6 +337,8 @@ export function transformSeries(
         }
         return '';
       },
+      rotate: rotateValue,
+      distance: distanceValue,
     },
   };
 }
