@@ -1163,6 +1163,28 @@ const FiltersConfigForm = (
             >
               <TextArea />
             </StyledFormItem>
+            {formFilter?.filterType === 'filter_time' && (
+              <StyledFormItem
+                name={['filters', filterId, 'timezone']}
+                initialValue={filterToEdit?.timezone || 'UTC'}
+                label={<StyledLabel>{t('Display Timezone')}</StyledLabel>}
+              >
+                <Select
+                  ariaLabel={t('Display timezone')}
+                  name="timezone"
+                  options={[
+                    { value: 'UTC', label: 'UTC' },
+                    { value: 'IST', label: 'IST (UTC+5:30)' },
+                  ]}
+                  onChange={value => {
+                    setNativeFilterFieldValues(form, filterId, {
+                      timezone: value,
+                    });
+                    forceUpdate();
+                  }}
+                />
+              </StyledFormItem>
+            )}
             <CleanFormItem
               name={['filters', filterId, 'defaultValueQueriesData']}
               hidden

@@ -53,6 +53,7 @@ import {
   AdvancedFrame,
   DateLabel,
 } from './components';
+import { COMMON_RANGE_OPTIONS } from './utils/constants';
 
 const StyledRangeType = styled(Select)`
   width: 272px;
@@ -157,6 +158,7 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
     onClosePopover = noOp,
     overlayStyle = 'Popover',
     isOverflowingFilterBar = false,
+    timezone = 'UTC',
   } = props;
   const defaultTimeFilter = useDefaultTimeFilter();
 
@@ -173,7 +175,10 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
   const [tooltipTitle, setTooltipTitle] = useState<ReactNode | null>(value);
   const theme = useTheme();
   const [labelRef, labelIsTruncated] = useCSSTextTruncation<HTMLSpanElement>();
-
+  const commonOption = COMMON_RANGE_OPTIONS.find(
+    option => option.value === value,
+  );
+  const displayLabel = commonOption ? commonOption.label : value;
   useEffect(() => {
     if (value === NO_TIME_RANGE) {
       setActualTimeRange(NO_TIME_RANGE);
@@ -181,13 +186,14 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
       setValidTimeRange(true);
       return;
     }
-    fetchTimeRange(value).then(({ value: actualRange, error }) => {
-      if (error) {
-        setEvalResponse(error || '');
-        setValidTimeRange(false);
-        setTooltipTitle(value || null);
-      } else {
-        /*
+    fetchTimeRange(value, 'col', timezone).then(
+      ({ value: actualRange, error }) => {
+        if (error) {
+          setEvalResponse(error || '');
+          setValidTimeRange(false);
+          setTooltipTitle(value || null);
+        } else {
+          /*
           HRT == human readable text
           ADR == actual datetime range
           +--------------+------+----------+--------+----------+-----------+
@@ -198,27 +204,30 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
           | tooltip      | ADR  | ADR      | HRT    | HRT      |   ADR     |
           +--------------+------+----------+--------+----------+-----------+
         */
-        if (
-          guessedFrame === 'Common' ||
-          guessedFrame === 'Calendar' ||
-          guessedFrame === 'No filter'
-        ) {
-          setActualTimeRange(value);
-          setTooltipTitle(
-            getTooltipTitle(labelIsTruncated, value, actualRange),
-          );
-        } else {
-          setActualTimeRange(actualRange || '');
-          setTooltipTitle(
-            getTooltipTitle(labelIsTruncated, actualRange, value),
-          );
+          if (
+            guessedFrame === 'Common' ||
+            guessedFrame === 'Calendar' ||
+            guessedFrame === 'No filter'
+          ) {
+            setActualTimeRange(
+              guessedFrame === 'Common' ? displayLabel : value,
+            );
+            setTooltipTitle(
+              getTooltipTitle(labelIsTruncated, value, actualRange),
+            );
+          } else {
+            setActualTimeRange(actualRange || '');
+            setTooltipTitle(
+              getTooltipTitle(labelIsTruncated, actualRange, value),
+            );
+          }
+          setValidTimeRange(true);
         }
-        setValidTimeRange(true);
-      }
-      setLastFetchedTimeRange(value);
-      setEvalResponse(actualRange || value);
-    });
-  }, [guessedFrame, labelIsTruncated, labelRef, value]);
+        setLastFetchedTimeRange(value);
+        setEvalResponse(actualRange || value);
+      },
+    );
+  }, [guessedFrame, labelIsTruncated, labelRef, value, timezone]);
 
   useDebouncedEffect(
     () => {
@@ -229,20 +238,22 @@ export default function DateFilterLabel(props: DateFilterControlProps) {
         return;
       }
       if (lastFetchedTimeRange !== timeRangeValue) {
-        fetchTimeRange(timeRangeValue).then(({ value: actualRange, error }) => {
-          if (error) {
-            setEvalResponse(error || '');
-            setValidTimeRange(false);
-          } else {
-            setEvalResponse(actualRange || '');
-            setValidTimeRange(true);
-          }
-          setLastFetchedTimeRange(timeRangeValue);
-        });
+        fetchTimeRange(timeRangeValue, 'col', timezone).then(
+          ({ value: actualRange, error }) => {
+            if (error) {
+              setEvalResponse(error || '');
+              setValidTimeRange(false);
+            } else {
+              setEvalResponse(actualRange || '');
+              setValidTimeRange(true);
+            }
+            setLastFetchedTimeRange(timeRangeValue);
+          },
+        );
       }
     },
     SLOW_DEBOUNCE,
-    [timeRangeValue],
+    [timeRangeValue, timezone],
   );
 
   function onSave() {
