@@ -259,6 +259,14 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         ("can_read", "Database"),
     }
 
+    DASHBOARD_LIST_FILTER_PERMISSIONS ={
+        ("can_show_owner_filter", "Dashboard"),
+        ("can_show_created_by_filter", "Dashboard"),
+        ("can_show_published_filter", "Dashboard"),
+        ("can_show_favorite_filter", "Dashboard"),
+        ("can_show_certified_filter", "Dashboard"),
+    }
+
     data_access_permissions = (
         "database_access",
         "schema_access",
@@ -728,6 +736,11 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         self.add_permission_view_menu("can_csv", "Superset")
         self.add_permission_view_menu("can_share_dashboard", "Superset")
         self.add_permission_view_menu("can_share_chart", "Superset")
+        self.add_permission_view_menu("can_show_owner_filter", "Dashboard")
+        self.add_permission_view_menu("can_show_created_by_filter", "Dashboard")
+        self.add_permission_view_menu("can_show_published_filter", "Dashboard")
+        self.add_permission_view_menu("can_show_favorite_filter", "Dashboard")
+        self.add_permission_view_menu("can_show_certified_filter", "Dashboard")
 
     def create_missing_perms(self) -> None:
         """
