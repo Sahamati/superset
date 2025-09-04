@@ -61,6 +61,7 @@ import CertifiedBadge from 'src/components/CertifiedBadge';
 import { loadTags } from 'src/components/Tags/utils';
 import DashboardCard from 'src/features/dashboards/DashboardCard';
 import { DashboardStatus } from 'src/features/dashboards/types';
+import { userHasPermission } from 'src/dashboard/util/permissionUtils';
 
 const PAGE_SIZE = 25;
 const PASSWORDS_NEEDED_MESSAGE = t(
@@ -500,6 +501,31 @@ function DashboardList(props: DashboardListProps) {
   );
 
   const filters: Filters = useMemo(() => {
+    const canSeeOwnerFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_show_owner_filter',
+    );
+    const canSeeCreatedByFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_show_created_by_filter',
+    );
+    const canSeeFavoriteFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_show_favorite_filter',
+    );
+    const canSeePublishedFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_show_published_filter',
+    );
+    const canSeeCertifiedFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_see_certified_filter',
+    );
     const filters_list = [
       {
         Header: t('Search'),
@@ -508,7 +534,9 @@ function DashboardList(props: DashboardListProps) {
         input: 'search',
         operator: FilterOperator.titleOrSlug,
       },
-      {
+    ] as Filters;
+    if (canSeeOwnerFilter) {
+      filters_list.push({
         Header: t('Owner'),
         key: 'owner',
         id: 'owners',
@@ -529,8 +557,10 @@ function DashboardList(props: DashboardListProps) {
           props.user,
         ),
         paginate: true,
-      },
-      {
+      });
+    }
+    if (canSeeCreatedByFilter) {
+      filters_list.push({
         Header: t('Created by'),
         key: 'created_by',
         id: 'created_by',
@@ -551,8 +581,11 @@ function DashboardList(props: DashboardListProps) {
           props.user,
         ),
         paginate: true,
-      },
-      {
+      });
+    }
+
+    if (canSeePublishedFilter) {
+      filters_list.push({
         Header: t('Status'),
         key: 'published',
         id: 'published',
@@ -563,9 +596,15 @@ function DashboardList(props: DashboardListProps) {
           { label: t('Published'), value: true },
           { label: t('Draft'), value: false },
         ],
-      },
-      ...(userId ? [favoritesFilter] : []),
-      {
+      });
+    }
+
+    if (canSeeFavoriteFilter) {
+      filters_list.push(...(userId ? [favoritesFilter] : []));
+    }
+
+    if (canSeeCertifiedFilter) {
+      filters_list.push({
         Header: t('Certified'),
         key: 'certified',
         id: 'id',
@@ -577,8 +616,9 @@ function DashboardList(props: DashboardListProps) {
           { label: t('Yes'), value: true },
           { label: t('No'), value: false },
         ],
-      },
-    ] as Filters;
+      });
+    }
+
     if (isFeatureEnabled(FeatureFlag.TAGGING_SYSTEM)) {
       filters_list.push({
         Header: t('Tags'),
