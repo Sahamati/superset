@@ -21,6 +21,7 @@
 
 
 {% set title = appbuilder.app.config['SIGNIN_TITLE'] %}
+{% set TOU = appbuilder.app.config['TERMS_OF_USE'] %}
 {% block content %}
 
 <div class="container">
@@ -33,6 +34,11 @@
 
                 <form class="form" action="" method="post" name="login">
                     {{form.hidden_tag()}}
+                    <div class="help-block">{{_("By Signing In, you agree to the Terms of User and Privacy Policy")}}
+                    </div>
+                    <a href="{{TOU}}">{{_("Terms of Use")}}</a>
+                    </br>
+                    <a href="https://sahamati.org.in/privacy-policy/">{{_("Privacy Policy")}}</a>
                     <div class="help-block">{{_("Enter your login and password below")}}:</div>
                     <div class="control-group{% if form.errors.openid is defined %} error{% endif %}">
                         <label class="control-label" for="username">{{_("Username")}}:</label>
