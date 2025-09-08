@@ -500,7 +500,10 @@ DEFAULT_FEATURE_FLAGS: dict[str, bool] = {
     # Do not show user info or profile in the menu
     "MENU_HIDE_USER_INFO": False,
 }
-
+# ------------------------------
+# Terms of Service URL
+# ------------------------------
+TERMS_OF_USE = "https://sahamati.org.in/terms-of-use-saans-dashboard/"
 # ------------------------------
 # SSH Tunnel
 # ------------------------------
