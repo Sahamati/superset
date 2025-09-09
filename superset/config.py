@@ -505,6 +505,9 @@ DEFAULT_FEATURE_FLAGS: dict[str, bool] = {
 # ------------------------------
 TERMS_OF_USE = "https://sahamati.org.in/terms-of-use-saans-dashboard/"
 # ------------------------------
+# Privacy Policy URL
+# ------------------------------
+PRIVACY_POLICY = "https://sahamati.org.in/privacy-policy/"
 # SSH Tunnel
 # ------------------------------
 # Allow users to set the host used when connecting to the SSH Tunnel
