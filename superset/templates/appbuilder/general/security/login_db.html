@@ -35,11 +35,13 @@
 
                 <form class="form" action="" method="post" name="login">
                     {{form.hidden_tag()}}
-                    <div class="help-block">{{_("By Signing In, you agree to the Terms of Use and Privacy Policy")}}
+                    <div class="help-block">
+                        {{_("By Signing in, you agree to the ")}}
+                        <a href="{{TOU}}">{{_("SAANS Terms of Use")}}</a>
+                        {{_(" and ")}}
+                        <a href="{{PP}}">{{_("Sahamati Privacy Policy,")}}</a>
+                        {{_("applicable to access and use of the service.")}}
                     </div>
-                    <a href="{{TOU}}">{{_("Terms of Use")}}</a>
-                    </br>
-                    <a href="{{PP}}">{{_("Privacy Policy")}}</a>
                     <div class="help-block">{{_("Enter your login and password below")}}:</div>
                     <div class="control-group{% if form.errors.openid is defined %} error{% endif %}">
                         <label class="control-label" for="username">{{_("Username")}}:</label>
