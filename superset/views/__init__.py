@@ -25,5 +25,7 @@ from . import (
     redirects,
     sql_lab,
     tags,
+    mfa,
+    sqla
 )
 from .log import api as log_api, views

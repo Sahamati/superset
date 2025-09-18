@@ -2333,3 +2333,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         return current_app.config["AUTH_ROLE_ADMIN"] in [
             role.name for role in self.get_user_roles()
         ]
+    def register_views(self) -> None:
+        from superset.views.mfa import MFAAuthDBView
+        self.auth_view = self.appbuilder.add_view_no_menu(MFAAuthDBView)
+        super().register_views()
