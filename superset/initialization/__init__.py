@@ -125,12 +125,6 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         from superset.cachekeys.api import CacheRestApi
         from superset.charts.api import ChartRestApi
         from superset.charts.data.api import ChartDataRestApi
-        from superset.connectors.sqla.views import (
-            RowLevelSecurityView,
-            SqlMetricInlineView,
-            TableColumnInlineView,
-            TableModelView,
-        )
         from superset.css_templates.api import CssTemplateRestApi
         from superset.dashboards.api import DashboardRestApi
         from superset.dashboards.filter_sets.api import FilterSetRestApi
@@ -155,6 +149,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         from superset.security.api import SecurityRestApi
         from superset.sqllab.api import SqlLabRestApi
         from superset.tags.api import TagRestApi
+        from superset.views.mfa import MFAView
         from superset.views.alerts import AlertView, ReportView
         from superset.views.all_entities import TaggedObjectsModelView, TaggedObjectView
         from superset.views.annotations import AnnotationLayerView
@@ -189,6 +184,12 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
             SqlLab,
             TableSchemaView,
             TabStateView,
+        )
+        from superset.views.sqla import (
+            RowLevelSecurityView,
+            SqlMetricInlineView,
+            TableColumnInlineView,
+            TableModelView,
         )
         from superset.views.tags import TagModelView, TagView
         from superset.views.users.api import CurrentUserRestApi
@@ -308,6 +309,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         appbuilder.add_view_no_menu(ExploreView)
         appbuilder.add_view_no_menu(ExplorePermalinkView)
         appbuilder.add_view_no_menu(KV)
+        appbuilder.add_view_no_menu(MFAView)
         appbuilder.add_view_no_menu(R)
         appbuilder.add_view_no_menu(SavedQueryView)
         appbuilder.add_view_no_menu(SavedQueryViewApi)
