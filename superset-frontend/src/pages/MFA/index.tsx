@@ -20,7 +20,6 @@
 import React, { useState } from 'react';
 import { SupersetClient, logging } from '@superset-ui/core';
 
-// import { Form, FormItem } from '../../components/Form';
 import { Input } from '../../components/Input';
 import Button from '../../components/Button';
 import { Layout, Typography } from 'antd';
@@ -31,46 +30,70 @@ interface MFAForm {
   code: string;
 }
 
-// const [loading, setLoading] = useState(false);
-
 // const bootstrapData = getBootstrapData();
+function ResendOtpButton() {
+  const [cooldown, setCooldown] = useState(30);
+
+  const resendOtp = async () => {
+    try {
+      await SupersetClient.post({
+        endpoint: '/mfa/resend',
+        parseMethod: 'text', // avoids JSON parse error
+      });
+      setCooldown(30);
+    } catch (err) {
+      alert('Failed to resend OTP');
+      console.error(err);
+    }
+  };
+
+  // cooldown timer
+  React.useEffect(() => {
+  if (cooldown <= 0) return;
+
+  const interval = setInterval(() => setCooldown(prev => prev - 1), 1000);
+
+  return () => clearInterval(interval);
+}, [cooldown]);
+
+
+  return (
+    <Button onClick={resendOtp} disabled={cooldown > 0}>
+      {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend OTP"}
+    </Button>
+  );
+}
 
 export default function MFA() {
   const [form] = Form.useForm<MFAForm>();
   const [loading, setLoading] = useState(false);
-
-  // const onFinish = (values: MFAForm) => {
-  //   setLoading(true);
-  //   SupersetClient.post({
-  //     endpoint: `/mfa/verify`,
-  //     jsonPayload: {
-  //       code: values.code,
-  //     }}
-  //   ).then(({ json }) => {
-  //       if (json?.status === "ok" && json?.redirect) {
-  //         logging.info("MFA verified, redirecting...");
-  //         window.location.href = json.redirect;
-  //       } else {
-  //         alert("Invalid MFA code");
-  //       }
-  //     })
-  //     .catch(err => {
-  //       logging.error("MFA verify failed", err);
-  //       alert("MFA verification failed");
-  //     })
-  //     .finally(() => {
-  //       setLoading(false);
-  //     });
-  // };
+  // const [disabled, setDisabled] = useState(true);
+  // const [countdown, setCountdown] = useState(30);
 
   const onFinish = (values: MFAForm) => {
     setLoading(true);
-    SupersetClient.postForm('/mfa/verify', { code: values.code })
+    SupersetClient.postForm('/mfa/verify', { code: values.code }, '_self')
       .catch(err => logging.error("MFA failed", err))
       .finally(() => {
         setLoading(false);
       });
+    // setCountdown(30);
+    // if (countdown > 30) {
+    //   setDisabled(false);
+    // }
   };
+
+  // const handleResend = () => {
+  //   logging.info("Resend OTP clicked");
+  //   setDisabled(true);
+  //   SupersetClient.postForm('/mfa/resend', {}, '_self')
+  //     .then(() => {
+  //       logging.info("OTP resent successfully");
+  //     })
+  //     .catch(err => {
+  //       logging.error("Failed to resend OTP", err);
+  //     });
+  // }
 
   return (
     <Layout style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -96,9 +119,10 @@ export default function MFA() {
             <Button type="primary" htmlType="submit" loading={loading} >
               Verify
             </Button>
-            <Button type="default" onClick={() => logging.info("Resend OTP clicked")}>
+            {/* <Button type="default" onClick={handleResend} disabled={disabled} >
               Resend OTP
-            </Button>
+            </Button> */}
+            <ResendOtpButton />
           </Form.Item>
         </Form>
       </div>

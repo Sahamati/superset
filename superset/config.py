@@ -1127,11 +1127,11 @@ FLASK_APP_MUTATOR = None
 
 # smtp server configuration
 EMAIL_NOTIFICATIONS = False  # all the emails are sent using dryrun
-SMTP_HOST = "localhost"
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = 587
 SMTP_STARTTLS = True
 SMTP_SSL = False
-SMTP_USER = "superset"
-SMTP_PORT = 25
+SMTP_USER = "superset@superset.com"
 SMTP_PASSWORD = "superset"
 SMTP_MAIL_FROM = "superset@superset.com"
 # If True creates a default SSL context with ssl.Purpose.CLIENT_AUTH using the
@@ -1503,6 +1503,14 @@ SSL_CERT_PATH: str | None = None
 
 SQLA_TABLE_MUTATOR = lambda table: table
 
+# MFA REDIS CONFIG
+MFA_REDIS_CONFIG = {
+    "port": 6379,
+    "host": "superset_cache",
+    "password": "",
+    "db": 1,
+    "ssl": False,
+}
 
 # Global async query config options.
 # Requires GLOBAL_ASYNC_QUERIES feature flag to be enabled.
