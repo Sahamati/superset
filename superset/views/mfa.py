@@ -50,20 +50,28 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
                 flash(as_unicode(self.invalid_login_message), "warning")
                 return redirect(self.appbuilder.get_url_for_login_with(next_url))
 
-            if get_otp(user.id):
-                logger.info("OTP already exists for user %s, not generating new one", user.email)
-                flash(as_unicode("An OTP has already been sent to your email. Please check your inbox."), "info")
-            else:
-                # generate the code for mfa
-                otp = generate_otp()
-                logger.info("Generated OTP for user %s: %s", user.email, otp)
+            # if get_otp(user.id):
+            #     logger.info("OTP already exists for user %s, not generating new one", user.email)
+            #     flash(as_unicode("An OTP has already been sent to your email. Please check your inbox."), "info")
+            # else:
+            #     # generate the code for mfa
+            #     otp = generate_otp()
+            #     logger.info("Generated OTP for user %s: %s", user.email, otp)
                 
-                # send the code to the user email
-                smtp_send_otp(user.email, otp)
-                logger.info("Sending OTP to email: %s", user.email)
-                # store the code in redis with expiry of 5 minutes against the user id in redis and then store the user id in session
-                set_otp(user.id, otp, ttl=300)
-                
+            #     # send the code to the user email
+            #     smtp_send_otp(user.email, otp)
+            #     logger.info("Sending OTP to email: %s", user.email)
+            #     # store the code in redis with expiry of 5 minutes against the user id in redis and then store the user id in session
+            #     set_otp(user.id, otp, ttl=300)
+            # generate the code for mfa
+            otp = generate_otp()
+            logger.info("Generated OTP for user %s: %s", user.email, otp)
+            
+            # send the code to the user email
+            smtp_send_otp(user.email, otp)
+            logger.info("Sending OTP to email: %s", user.email)
+            # store the code in redis with expiry of 5 minutes against the user id in redis and then store the user id in session
+            set_otp(user.id, otp, ttl=300)
             session["mfa_user_id"] = user.id
             session["mfa_next_url"] = next_url
             return redirect("/mfa/verify")
