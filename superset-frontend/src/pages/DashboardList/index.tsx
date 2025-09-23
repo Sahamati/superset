@@ -179,30 +179,30 @@ function DashboardList(props: DashboardListProps) {
   const canExport =
     hasPerm('can_export') && isFeatureEnabled(FeatureFlag.VERSIONED_EXPORT);
   const canSeeOwnerFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_show_owner_filter',
-    );
-    const canSeeCreatedByFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_show_created_by_filter',
-    );
-    const canSeeFavoriteFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_show_favorite_filter',
-    );
-    const canSeePublishedFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_show_published_filter',
-    );
-    const canSeeCertifiedFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_see_certified_filter',
-    );
+    props.user,
+    'Dashboard',
+    'can_show_owner_filter',
+  );
+  const canSeeCreatedByFilter = userHasPermission(
+    props.user,
+    'Dashboard',
+    'can_show_created_by_filter',
+  );
+  const canSeeFavoriteFilter = userHasPermission(
+    props.user,
+    'Dashboard',
+    'can_show_favorite_filter',
+  );
+  const canSeePublishedFilter = userHasPermission(
+    props.user,
+    'Dashboard',
+    'can_show_published_filter',
+  );
+  const canSeeCertifiedFilter = userHasPermission(
+    props.user,
+    'Dashboard',
+    'can_see_certified_filter',
+  );
 
   const initialSort = [{ id: 'changed_on_delta_humanized', desc: true }];
 
@@ -337,7 +337,7 @@ function DashboardList(props: DashboardListProps) {
           row: {
             original: { changed_by_name: changedByName },
           },
-        }: any) =><>{changedByName}</>,
+        }: any) => <>{changedByName}</>,
         Header: t('Modified by'),
         accessor: 'changed_by.first_name',
         size: 'xl',
