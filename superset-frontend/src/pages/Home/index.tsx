@@ -158,7 +158,6 @@ export const LoadingCards = ({ cover }: LoadingProps) => (
 function Welcome({ user, addDangerToast }: WelcomeProps) {
   const canWriteChart = userHasPermission(user, 'Chart', 'can_write');
   const canReadSavedQueries = userHasPermission(user, 'SavedQuery', 'can_read');
-  const canWriteCharts = userHasPermission(user, 'Chart', 'can_write');
   const userid = user.userId;
   const id = userid!.toString(); // confident that user is not a guest user
   const params = rison.encode({ page_size: 6 });
@@ -273,7 +272,7 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
           );
           return Promise.resolve();
         }),
-      canWriteCharts
+      canWriteChart
       ? getUserOwnedObjects(id, 'chart')
         .then(r => {
           setChartData(r);
@@ -400,7 +399,7 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
                   />
                 )}
               </Collapse.Panel>
-              {canWriteCharts && (<Collapse.Panel header={t('Charts')} key="3">
+              {canWriteChart && (<Collapse.Panel header={t('Charts')} key="3">
                 {!chartData || isRecentActivityLoading ? (
                   <LoadingCards cover={checked} />
                 ) : (
