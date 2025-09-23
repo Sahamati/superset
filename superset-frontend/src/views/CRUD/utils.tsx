@@ -187,29 +187,40 @@ export const getRecentActivityObjs = (
   recent: string,
   addDangerToast: (arg1: string, arg2: any) => any,
   filters: Filter[],
+  canWriteChart = true,
 ) =>
   SupersetClient.get({ endpoint: recent }).then(recentsRes => {
-    const res: any = {};
     const newBatch = [
-      SupersetClient.get({
-        endpoint: `/api/v1/chart/?q=${getParams(filters)}`,
-      }),
+      ...(canWriteChart
+        ? [
+            SupersetClient.get({
+              endpoint: `/api/v1/chart/?q=${getParams(filters)}`,
+            }),
+          ]
+        : []),
       SupersetClient.get({
         endpoint: `/api/v1/dashboard/?q=${getParams(filters)}`,
       }),
     ];
+
     return Promise.all(newBatch)
-      .then(([chartRes, dashboardRes]) => {
-        res.other = [...chartRes.json.result, ...dashboardRes.json.result];
-        res.viewed = recentsRes.json.result;
-        return res;
+      .then(responses => {
+        const [chartRes, dashboardRes] = canWriteChart
+          ? responses
+          : [{ json: { result: [] } }, responses[0]];
+
+        return {
+          other: [...chartRes.json.result, ...dashboardRes.json.result],
+          viewed: recentsRes?.json?.result ?? [],
+        };
       })
-      .catch(errMsg =>
+      .catch(errMsg => {
         addDangerToast(
           t('There was an error fetching your recent activity:'),
           errMsg,
-        ),
-      );
+        );
+        return { other: [], viewed: [] }; // 👈 always return something
+      });
   });
 
 export const createFetchRelated = createFetchResourceMethod('related');
