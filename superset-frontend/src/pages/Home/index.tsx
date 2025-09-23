@@ -156,6 +156,7 @@ export const LoadingCards = ({ cover }: LoadingProps) => (
 );
 
 function Welcome({ user, addDangerToast }: WelcomeProps) {
+  const canWriteChart = userHasPermission(user, 'Chart', 'can_write');
   const canReadSavedQueries = userHasPermission(user, 'SavedQuery', 'can_read');
   const canWriteCharts = userHasPermission(user, 'Chart', 'can_write');
   const userid = user.userId;
@@ -223,7 +224,7 @@ function Welcome({ user, addDangerToast }: WelcomeProps) {
     }
     const activeTab = getItem(LocalStorageKeys.homepage_activity_filter, null);
     setActiveState(collapseState.length > 0 ? collapseState : DEFAULT_TAB_ARR);
-    getRecentActivityObjs(user.userId!, recent, addDangerToast, otherTabFilters)
+    getRecentActivityObjs(user.userId!, recent, addDangerToast, otherTabFilters, canWriteChart)
       .then(res => {
         const data: ActivityData | null = {};
         data[TableTab.Other] = res.other;
