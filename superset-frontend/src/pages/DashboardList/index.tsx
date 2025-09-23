@@ -178,6 +178,31 @@ function DashboardList(props: DashboardListProps) {
   const canDelete = hasPerm('can_write');
   const canExport =
     hasPerm('can_export') && isFeatureEnabled(FeatureFlag.VERSIONED_EXPORT);
+  const canSeeOwnerFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_show_owner_filter',
+    );
+    const canSeeCreatedByFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_show_created_by_filter',
+    );
+    const canSeeFavoriteFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_show_favorite_filter',
+    );
+    const canSeePublishedFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_show_published_filter',
+    );
+    const canSeeCertifiedFilter = userHasPermission(
+      props.user,
+      'Dashboard',
+      'can_see_certified_filter',
+    );
 
   const initialSort = [{ id: 'changed_on_delta_humanized', desc: true }];
 
@@ -278,7 +303,7 @@ function DashboardList(props: DashboardListProps) {
         id: 'id',
         disableSortBy: true,
         size: 'xs',
-        hidden: !userId,
+        hidden: !userId || !canSeeFavoriteFilter,
       },
       {
         Cell: ({
@@ -312,10 +337,11 @@ function DashboardList(props: DashboardListProps) {
           row: {
             original: { changed_by_name: changedByName },
           },
-        }: any) => <>{changedByName}</>,
+        }: any) =><>{changedByName}</>,
         Header: t('Modified by'),
         accessor: 'changed_by.first_name',
         size: 'xl',
+        hidden: !canSeeCreatedByFilter,
       },
       {
         Cell: ({
@@ -327,6 +353,7 @@ function DashboardList(props: DashboardListProps) {
         Header: t('Status'),
         accessor: 'published',
         size: 'xl',
+        hidden: !canSeePublishedFilter,
       },
       {
         Cell: ({
@@ -337,6 +364,7 @@ function DashboardList(props: DashboardListProps) {
         Header: t('Modified'),
         accessor: 'changed_on_delta_humanized',
         size: 'xl',
+        hidden: !canSeeCreatedByFilter,
       },
       {
         Cell: ({
@@ -349,6 +377,7 @@ function DashboardList(props: DashboardListProps) {
         accessor: 'created_by',
         disableSortBy: true,
         size: 'xl',
+        hidden: !canSeeCreatedByFilter,
       },
       {
         Cell: ({
@@ -360,6 +389,7 @@ function DashboardList(props: DashboardListProps) {
         accessor: 'owners',
         disableSortBy: true,
         size: 'xl',
+        hidden: !canSeeOwnerFilter,
       },
       {
         Cell: ({
@@ -501,31 +531,6 @@ function DashboardList(props: DashboardListProps) {
   );
 
   const filters: Filters = useMemo(() => {
-    const canSeeOwnerFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_show_owner_filter',
-    );
-    const canSeeCreatedByFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_show_created_by_filter',
-    );
-    const canSeeFavoriteFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_show_favorite_filter',
-    );
-    const canSeePublishedFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_show_published_filter',
-    );
-    const canSeeCertifiedFilter = userHasPermission(
-      props.user,
-      'Dashboard',
-      'can_see_certified_filter',
-    );
     const filters_list = [
       {
         Header: t('Search'),
