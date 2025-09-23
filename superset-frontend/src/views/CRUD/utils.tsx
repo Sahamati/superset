@@ -72,58 +72,58 @@ export const Actions = styled.div`
 
 const createFetchResourceMethod =
   (method: string) =>
-    (
-      resource: string,
-      relation: string,
-      handleError: (error: Response) => void,
-      user?: { userId: string | number; firstName: string; lastName: string },
-    ) =>
-      async (filterValue = '', page: number, pageSize: number) => {
-        const resourceEndpoint = `/api/v1/${resource}/${method}/${relation}`;
-        const queryParams = rison.encode_uri({
-          filter: filterValue,
-          page,
-          page_size: pageSize,
-        });
-        const { json = {} } = await SupersetClient.get({
-          endpoint: `${resourceEndpoint}?q=${queryParams}`,
-        });
+  (
+    resource: string,
+    relation: string,
+    handleError: (error: Response) => void,
+    user?: { userId: string | number; firstName: string; lastName: string },
+  ) =>
+  async (filterValue = '', page: number, pageSize: number) => {
+    const resourceEndpoint = `/api/v1/${resource}/${method}/${relation}`;
+    const queryParams = rison.encode_uri({
+      filter: filterValue,
+      page,
+      page_size: pageSize,
+    });
+    const { json = {} } = await SupersetClient.get({
+      endpoint: `${resourceEndpoint}?q=${queryParams}`,
+    });
 
-        let fetchedLoggedUser = false;
-        const loggedUser = user
-          ? {
-            label: `${user.firstName} ${user.lastName}`,
-            value: user.userId,
-          }
-          : undefined;
-
-        const data: { label: string; value: string | number }[] = [];
-        json?.result
-          ?.filter(({ text }: { text: string }) => text.trim().length > 0)
-          .forEach(({ text, value }: { text: string; value: string | number }) => {
-            if (
-              loggedUser &&
-              value === loggedUser.value &&
-              text === loggedUser.label
-            ) {
-              fetchedLoggedUser = true;
-            } else {
-              data.push({
-                label: text,
-                value,
-              });
-            }
-          });
-
-        if (loggedUser && (!filterValue || fetchedLoggedUser)) {
-          data.unshift(loggedUser);
+    let fetchedLoggedUser = false;
+    const loggedUser = user
+      ? {
+          label: `${user.firstName} ${user.lastName}`,
+          value: user.userId,
         }
+      : undefined;
 
-        return {
-          data,
-          totalCount: json?.count,
-        };
-      };
+    const data: { label: string; value: string | number }[] = [];
+    json?.result
+      ?.filter(({ text }: { text: string }) => text.trim().length > 0)
+      .forEach(({ text, value }: { text: string; value: string | number }) => {
+        if (
+          loggedUser &&
+          value === loggedUser.value &&
+          text === loggedUser.label
+        ) {
+          fetchedLoggedUser = true;
+        } else {
+          data.push({
+            label: text,
+            value,
+          });
+        }
+      });
+
+    if (loggedUser && (!filterValue || fetchedLoggedUser)) {
+      data.unshift(loggedUser);
+    }
+
+    return {
+      data,
+      totalCount: json?.count,
+    };
+  };
 
 export const PAGE_SIZE = 5;
 const getParams = (filters?: Filter[]) => {
@@ -222,7 +222,6 @@ export const getRecentActivityObjs = (
         return { other: [], viewed: [] }; // 👈 always return something
       });
   });
-
 
 export const createFetchRelated = createFetchResourceMethod('related');
 export const createFetchDistinct = createFetchResourceMethod('distinct');
@@ -355,9 +354,10 @@ export const CardContainer = styled.div<{
     grid-template-columns: repeat(auto-fit, 300px);
     max-height: ${showThumbnails ? '314' : '148'}px;
     margin-top: ${theme.gridUnit * -6}px;
-    padding: ${showThumbnails
-      ? `${theme.gridUnit * 8 + 3}px ${theme.gridUnit * 9}px`
-      : `${theme.gridUnit * 8 + 1}px ${theme.gridUnit * 9}px`
+    padding: ${
+      showThumbnails
+        ? `${theme.gridUnit * 8 + 3}px ${theme.gridUnit * 9}px`
+        : `${theme.gridUnit * 8 + 1}px ${theme.gridUnit * 9}px`
     };
   `}
 `;
@@ -379,37 +379,37 @@ export const StyledIcon = (theme: SupersetTheme) => css`
 `;
 
 export /* eslint-disable no-underscore-dangle */
-  const isNeedsPassword = (payload: any) =>
-    typeof payload === 'object' &&
-    Array.isArray(payload._schema) &&
-    !!payload._schema?.find(
-      (e: string) => e === 'Must provide a password for the database',
-    );
+const isNeedsPassword = (payload: any) =>
+  typeof payload === 'object' &&
+  Array.isArray(payload._schema) &&
+  !!payload._schema?.find(
+    (e: string) => e === 'Must provide a password for the database',
+  );
 
 export /* eslint-disable no-underscore-dangle */
-  const isNeedsSSHPassword = (payload: any) =>
-    typeof payload === 'object' &&
-    Array.isArray(payload._schema) &&
-    !!payload._schema?.find(
-      (e: string) => e === 'Must provide a password for the ssh tunnel',
-    );
+const isNeedsSSHPassword = (payload: any) =>
+  typeof payload === 'object' &&
+  Array.isArray(payload._schema) &&
+  !!payload._schema?.find(
+    (e: string) => e === 'Must provide a password for the ssh tunnel',
+  );
 
 export /* eslint-disable no-underscore-dangle */
-  const isNeedsSSHPrivateKey = (payload: any) =>
-    typeof payload === 'object' &&
-    Array.isArray(payload._schema) &&
-    !!payload._schema?.find(
-      (e: string) => e === 'Must provide a private key for the ssh tunnel',
-    );
+const isNeedsSSHPrivateKey = (payload: any) =>
+  typeof payload === 'object' &&
+  Array.isArray(payload._schema) &&
+  !!payload._schema?.find(
+    (e: string) => e === 'Must provide a private key for the ssh tunnel',
+  );
 
 export /* eslint-disable no-underscore-dangle */
-  const isNeedsSSHPrivateKeyPassword = (payload: any) =>
-    typeof payload === 'object' &&
-    Array.isArray(payload._schema) &&
-    !!payload._schema?.find(
-      (e: string) =>
-        e === 'Must provide a private key password for the ssh tunnel',
-    );
+const isNeedsSSHPrivateKeyPassword = (payload: any) =>
+  typeof payload === 'object' &&
+  Array.isArray(payload._schema) &&
+  !!payload._schema?.find(
+    (e: string) =>
+      e === 'Must provide a private key password for the ssh tunnel',
+  );
 
 export const isAlreadyExists = (payload: any) =>
   typeof payload === 'string' &&
