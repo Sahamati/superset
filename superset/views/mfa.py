@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# from flask_appbuilder.security.views import AuthDBView
 from .base import BaseSupersetView
 from flask import g, redirect, request, flash, session, make_response
 from flask_appbuilder._compat import as_unicode
@@ -24,11 +23,10 @@ from flask_login import login_user
 from flask_appbuilder.security.views import AuthDBView
 from flask_appbuilder.security.forms import LoginForm_db
 from flask_appbuilder.utils.base import get_safe_redirect
-from superset.utils.mfa import set_otp, get_otp, delete_otp, generate_otp, smtp_send_otp, get_del_otp
+from superset.utils.mfa import set_otp, get_otp, delete_otp, generate_otp, smtp_send_otp, get_del_otp, set_otp_nx, mfa_redis
 import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-from superset.utils.mfa import smtp_send_otp
 from superset.superset_typing import FlaskResponse
 
 class MFAAuthDBView(BaseSupersetView, AuthDBView):
@@ -36,10 +34,10 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
     @expose("/", methods=["GET", "POST"])
     def login(self):
         if g.user is not None and g.user.is_authenticated:
-            return redirect(self.appbuilder.get_url_for_index())
+            return redirect(self.appbuilder.get_url_for_index)
         
         # TODO if the user comes to the page from mfa verification, remove the mfa_user_id from session
-
+        logger.info("Session id of the user: %s", session.get("mfa_user_id"))
         form = LoginForm_db()
         if form.validate_on_submit():
             next_url = get_safe_redirect(request.args.get("next", ""))
@@ -49,29 +47,42 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
             if not user:
                 flash(as_unicode(self.invalid_login_message), "warning")
                 return redirect(self.appbuilder.get_url_for_login_with(next_url))
-
-            # if get_otp(user.id):
-            #     logger.info("OTP already exists for user %s, not generating new one", user.email)
-            #     flash(as_unicode("An OTP has already been sent to your email. Please check your inbox."), "info")
-            # else:
-            #     # generate the code for mfa
-            #     otp = generate_otp()
-            #     logger.info("Generated OTP for user %s: %s", user.email, otp)
+            
+            for roles in user.roles:
+                if roles == self.appbuilder.sm.find_role("Public"):
+                    login_user(user, remember=False)
+                    return redirect(next_url)
+            logger.info("checking to see if the otp exists for user: %s", get_otp(user.id))
+            if get_otp(user.id):
+                # if a otp exists for the user, it means that they are trying to loop the mfa to login to mfa page and trying to create a loop
+                # attackers can automate this to spam the email, our infrastructure and email provider
+                # hence, if this happens, we will redirect the user back to the login page with a warning
+                flash(as_unicode("An OTP has already been sent to your email. Please resend otp or wait for 5 minutes before trying again."), "warning")
+                logger.warning("MFA loop attempt detected for user %s %s", user.email, get_otp(user.id))
+                return redirect("/mfa/verify")
                 
-            #     # send the code to the user email
-            #     smtp_send_otp(user.email, otp)
-            #     logger.info("Sending OTP to email: %s", user.email)
-            #     # store the code in redis with expiry of 5 minutes against the user id in redis and then store the user id in session
-            #     set_otp(user.id, otp, ttl=300)
-            # generate the code for mfa
+            # --- LOCK START ---
+            lock_key = f"otp_lock:{user.id}"
+            lock_acquired = mfa_redis.set(lock_key, "1", nx=True, ex=60)  # 60s lock
+            if not lock_acquired:
+                flash(as_unicode(
+                    "An OTP has already been sent. Please check your email or wait before trying again."
+                ), "warning")
+                return redirect("/mfa/verify")
+            # --- LOCK END ---
+                
+            # generate the otp for mfa
             otp = generate_otp()
             logger.info("Generated OTP for user %s: %s", user.email, otp)
             
+            # store the otp in redis with expiry of 5 minutes against the user id in redis and then store the user id in session
+            set_otp_nx(user.id, otp, ttl=30)
+            
             # send the code to the user email
+            
             smtp_send_otp(user.email, otp)
             logger.info("Sending OTP to email: %s", user.email)
-            # store the code in redis with expiry of 5 minutes against the user id in redis and then store the user id in session
-            set_otp(user.id, otp, ttl=300)
+            
             session["mfa_user_id"] = user.id
             session["mfa_next_url"] = next_url
             return redirect("/mfa/verify")
@@ -88,7 +99,7 @@ class MFAView(BaseSupersetView):
     def verify(self) -> FlaskResponse:
         # if the user is logged in already, then go to whatever page they wanted to go to
         if g.user is not None and g.user.is_authenticated:
-            return redirect(self.appbuilder.get_url_for_index())
+            return redirect(self.appbuilder.get_url_for_index)
         
         # if the session does not have the user_id, then the mfa session has expired/the user did not come from login
         # redirect to login page
@@ -109,6 +120,8 @@ class MFAView(BaseSupersetView):
         # whats the point of checking the code if there is no user? But check the code regardless of user, because it might be a bot attack
         # Step3 get the code against the user_id
         
+        if g.user is not None and g.user.is_authenticated:
+            return redirect(self.appbuilder.get_url_for_index)
         #Step 1
         code = request.form.get("code")
         
@@ -117,7 +130,7 @@ class MFAView(BaseSupersetView):
         logger.info("MFA attempt: user_id=%s, code=%s", user_id, code)
 
         if not user_id:
-            logger.warning("MFA session expired — redirecting to login")
+            logger.warning("MFA session expired - redirecting to login")
             flash(as_unicode("MFA session expired. Please login again."), "warning")
             return redirect(self.appbuilder.get_url_for_login())
 
@@ -129,6 +142,10 @@ class MFAView(BaseSupersetView):
             logger.error("MFA failed: no user found for id=%s", user_id)
             flash(as_unicode("User not found. Please login again."), "warning")
             return redirect(self.appbuilder.get_url_for_login())
+        
+        if not otp:
+            flash(as_unicode("MFA session expired or invalid. Please login again."), "warning")
+            return redirect(self.appbuilder.get_url_for_login)
         
         if code == otp:
             next_url = session.get("mfa_next_url")
@@ -145,6 +162,13 @@ class MFAView(BaseSupersetView):
             return redirect("/mfa/verify")
     
     @expose("/resend", methods=["POST"])
+    
+    # for resending code, the logic is simple. 
+    # Step 1: delete the otp before resending from redis (if it exists).
+    # Step 2: generate a new otp
+    # Step 3: store the new otp in redis
+    # Step 4: send the new otp to user email
+    
     def resend_code(self) -> FlaskResponse:
         user_id = session.get("mfa_user_id")
         if not user_id:
@@ -156,12 +180,24 @@ class MFAView(BaseSupersetView):
             logger.error("MFA resend failed: no user found for id=%s", user_id)
             flash(as_unicode("User not found. Please login again."), "warning")
             return redirect(self.appbuilder.get_url_for_login())
+        
+        # Step 1:
         get_del_otp(user_id)  # delete existing otp if any
+        
+        # Step 2:
         otp = generate_otp()
         logger.info("Generated new OTP for user %s: %s", user.email, otp)
+        generated_otp = get_otp(user.id)
+        logger.info("OTP in Redis before resending: %s", generated_otp)
+        
+        # Step 3:
+        set_otp(user.id, otp, ttl=30)  # store new otp
+        
+        # Step 4:
         smtp_send_otp(user.email, otp)
-        set_otp(user.id, otp, ttl=300)  # store new otp
         logger.info("Resent OTP to email: %s", user.email)
+        
+        # Step 5:
         flash(as_unicode("A new OTP has been sent to your email."), "info")
         return make_response("", 200)
         

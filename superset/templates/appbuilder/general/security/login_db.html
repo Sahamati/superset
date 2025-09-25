@@ -18,7 +18,7 @@
 #}
 <!-- extend base layout -->
 {% extends "appbuilder/base.html" %}
-
+{% import "superset/macros.html" as macros %}
 
 {% set title = appbuilder.app.config['SIGNIN_TITLE'] %}
 {% set TOU = appbuilder.app.config['TERMS_OF_USE'] %}
@@ -33,7 +33,7 @@
             </div>
             <div style="padding-top:30px" class="panel-body" >
 
-                <form class="form" action="" method="post" name="login">
+                <form class="form" action="" method="post" name="login" id="login-form">
                     {{form.hidden_tag()}}
                     <div class="help-block">
                         {{_("By Signing in, you agree to the ")}}
@@ -70,7 +70,9 @@
                         <div class="controls">
                             <br>
                             <div>
-                                <input class="btn btn-primary btn-block" type="submit" value="{{_('Sign In')}}">
+                                <button id="login-button" class="btn btn-primary btn-block" type="submit">
+                                    {{_('Sign In')}}
+                                </button>
                                 {% if appbuilder.sm.auth_user_registration %}
                                 <a href="{{appbuilder.sm.get_url_for_registeruser}}" class="btn btn-block btn-primary" data-toggle="tooltip" rel="tooltip"
                                 title="{{_('If you are not already a user, please register')}}">
@@ -86,4 +88,21 @@
         </div>
     </div>
 </div>
+<script nonce="{{ macros.get_nonce() }}">
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('login-form');
+    const button = document.getElementById('login-button');
+
+    if (form && button) {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            button.disabled = true;
+            button.innerText = 'Signing in...';
+            setTimeout(() => {
+                form.submit();
+            }, 100);
+        });
+    }
+});
+</script>
 {% endblock %}

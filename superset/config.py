@@ -499,6 +499,7 @@ DEFAULT_FEATURE_FLAGS: dict[str, bool] = {
     # or to disallow users from viewing other users profile page
     # Do not show user info or profile in the menu
     "MENU_HIDE_USER_INFO": False,
+    "ENABLE_MFA": False
 }
 # ------------------------------
 # Terms of Service URL

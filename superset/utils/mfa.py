@@ -62,16 +62,21 @@ def set_otp(id: int, otp: str, ttl: int = 300) -> None:
     Store OTP with a time-to-live (default 5 minutes).
     """
     key = f"otp:{id}"
-    mfa_redis.set(key, ttl, otp, nx=True)  # <--- safe Redis command for OTPs
+    mfa_redis.setex(key, ttl, otp)  # <--- safe Redis command for OTPs
 
-
+def set_otp_nx(id: int, otp: str, ttl: int = 300) -> None:
+    """
+    Store OTP with a time-to-live (default 5 minutes).
+    """
+    key = f"otp:{id}"
+    mfa_redis.set(key, otp, ttl, nx= True)  # <--- safe Redis command for OTPs
+    
 def get_otp(id: int) -> Optional[str]:
     """
     Retrieve OTP for a given email.
     """
     key = f"otp:{id}"
     return mfa_redis.get(key)
-
 
 def delete_otp(id: int) -> None:
     """
