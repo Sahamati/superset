@@ -19,29 +19,30 @@ from flask import current_app
 from superset.utils.core import send_email_smtp
 import secrets
 from superset import app
+from smtplib import SMTPException
 
 import redis
-import os
 
 from typing import Optional
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger("superset")
 logger.setLevel(logging.INFO)
 
 # otp util
-def smtp_send_otp(user_email: str, otp: str) -> None:
+def smtp_send_otp(user_email: str, otp: str) -> bool:
         """Send the OTP to the user's email address via SMTP."""
         subject = "Your MFA Code"
         body = f"Your MFA code is: {otp}"
-        send_email_smtp(
-            to=user_email,
-            subject=subject,
-            config=current_app.config,
-            html_content=body,
-        )
-        logger.info("Sent MFA code to %s", user_email)
-        logger.info("OTP: %s", otp)
-        logger.info("Config: %s", current_app.config["SMTP_HOST"])
+        try:
+            send_email_smtp(
+                to=user_email,
+                subject=subject,
+                config=current_app.config,
+                html_content=body,
+            )
+        except SMTPException as e:
+            logger.warning("Failed to send otp to: %s %s", e)
+            return False
 
 # generate otp util    
 def generate_otp() -> str:
@@ -57,19 +58,13 @@ mfa_redis = redis.Redis(
     decode_responses=True, # ensure we get strings back instead of bytes
 )
 
-def set_otp(id: int, otp: str, ttl: int = 300) -> None:
+def set_otp_nx(id: int, otp: str, ttl: int = 300) -> bool:
     """
     Store OTP with a time-to-live (default 5 minutes).
     """
     key = f"otp:{id}"
-    mfa_redis.setex(key, ttl, otp)  # <--- safe Redis command for OTPs
-
-def set_otp_nx(id: int, otp: str, ttl: int = 300) -> None:
-    """
-    Store OTP with a time-to-live (default 5 minutes).
-    """
-    key = f"otp:{id}"
-    mfa_redis.set(key, otp, ttl, nx= True)  # <--- safe Redis command for OTPs
+    result = mfa_redis.set(key, otp, ex= ttl, nx= True)
+    return bool(result)
     
 def get_otp(id: int) -> Optional[str]:
     """
@@ -94,17 +89,11 @@ def get_del_otp(id: int) -> Optional[str]:
         return mfa_redis.getdel(key)
     return None
 
-# def get_last_otp_time(id: int) -> Optional[float]:
-#     """
-#     Retrieve the last OTP generation time for a given user ID.
-#     """
-#     key = f"otp_time:{id}"
-#     timestamp = mfa_redis.get(key)
-#     return float(timestamp) if timestamp else None
-
-# def set_last_otp_time(id: int) -> None:
-#     """
-#     Store the current time as the last OTP generation time.
-#     """
-#     key = f"otp_time:{id}"
-#     mfa_redis.set(key, os.path.getmtime(__file__))  # Using file's mod time as a proxy for current time
+def otp_exists(id: int) -> bool:
+    """
+    Check if otp exists or not.
+    """
+    key = f"otp:{id}"
+    if mfa_redis.exists(key):
+        return True
+    return False

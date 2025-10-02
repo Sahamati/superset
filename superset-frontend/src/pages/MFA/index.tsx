@@ -30,32 +30,46 @@ interface MFAForm {
   code: string;
 }
 
-// const bootstrapData = getBootstrapData();
+// Rewriting the resend button logic. Added a json api that calls and checks the ttl time. The resend button is going to remain active
+// but it will return 429: too many requests error.
 function ResendOtpButton() {
-  const [cooldown, setCooldown] = useState(30);
+  const [cooldown, setCooldown] = useState(0);
 
-  const resendOtp = async () => {
+  const fetchTTL = async () => {
     try {
-      await SupersetClient.post({
-        endpoint: '/mfa/resend',
-        parseMethod: 'text', // avoids JSON parse error
+      const res = await SupersetClient.post({
+        endpoint: "/mfa/resend?check_only=true",
+        parseMethod: "json",
       });
-      setCooldown(30);
+      setCooldown(res.json.ttl);
     } catch (err) {
-      alert('Failed to resend OTP');
-      console.error(err);
+      console.error("Failed to fetch OTP TTL", err);
     }
   };
 
+  const resendOtp = async () => {
+    try {
+      const res = await SupersetClient.post({
+        endpoint: "/mfa/resend",
+        parseMethod: "json",
+      });
+      setCooldown(res.json.ttl);
+    } catch (err) {
+      console.error("Failed to resend OTP", err);
+    }
+  };
+
+  // On mount, fetch current TTL
+  React.useEffect(() => {
+    fetchTTL();
+  }, []);
+
   // cooldown timer
   React.useEffect(() => {
-  if (cooldown <= 0) return;
-
-  const interval = setInterval(() => setCooldown(prev => prev - 1), 1000);
-
-  return () => clearInterval(interval);
-}, [cooldown]);
-
+    if (cooldown <= 0) return;
+    const interval = setInterval(() => setCooldown(prev => prev - 1), 1000);
+    return () => clearInterval(interval);
+  }, [cooldown]);
 
   return (
     <Button onClick={resendOtp} disabled={cooldown > 0}>
@@ -64,11 +78,10 @@ function ResendOtpButton() {
   );
 }
 
+
 export default function MFA() {
   const [form] = Form.useForm<MFAForm>();
   const [loading, setLoading] = useState(false);
-  // const [disabled, setDisabled] = useState(true);
-  // const [countdown, setCountdown] = useState(30);
 
   const onFinish = (values: MFAForm) => {
     setLoading(true);
@@ -77,23 +90,7 @@ export default function MFA() {
       .finally(() => {
         setLoading(false);
       });
-    // setCountdown(30);
-    // if (countdown > 30) {
-    //   setDisabled(false);
-    // }
   };
-
-  // const handleResend = () => {
-  //   logging.info("Resend OTP clicked");
-  //   setDisabled(true);
-  //   SupersetClient.postForm('/mfa/resend', {}, '_self')
-  //     .then(() => {
-  //       logging.info("OTP resent successfully");
-  //     })
-  //     .catch(err => {
-  //       logging.error("Failed to resend OTP", err);
-  //     });
-  // }
 
   return (
     <Layout style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -119,9 +116,6 @@ export default function MFA() {
             <Button type="primary" htmlType="submit" loading={loading} >
               Verify
             </Button>
-            {/* <Button type="default" onClick={handleResend} disabled={disabled} >
-              Resend OTP
-            </Button> */}
             <ResendOtpButton />
           </Form.Item>
         </Form>
