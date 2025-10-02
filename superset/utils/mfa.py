@@ -31,8 +31,8 @@ logger.setLevel(logging.INFO)
 # otp util
 def smtp_send_otp(user_email: str, otp: str) -> bool:
         """Send the OTP to the user's email address via SMTP."""
-        subject = "Your MFA Code"
-        body = f"Your MFA code is: {otp}"
+        subject = "Sahamati SaaNs Login OTP"
+        body = f"Your login verification otp is: {otp}"
         try:
             send_email_smtp(
                 to=user_email,
