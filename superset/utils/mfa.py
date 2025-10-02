@@ -58,14 +58,38 @@ mfa_redis = redis.Redis(
     decode_responses=True, # ensure we get strings back instead of bytes
 )
 
-def set_otp_nx(id: int, otp: str, ttl: int = 300) -> bool:
+def set_otp(id: int, otp: str, ttl: int = 300, **kwargs) -> bool:
     """
-    Store OTP with a time-to-live (default 5 minutes).
+    Store OTP in Redis with a time-to-live (default 5 minutes).
+    Additional Redis parameters (nx, xx, etc.) can be passed via kwargs.
+
+    Args:
+        id (int): User ID
+        otp (str): OTP string
+        ttl (int, optional): Expiration in seconds. Defaults to 300.
+        **kwargs: Extra parameters for redis.set (nx, xx, etc.)
+
+    Returns:
+        bool: True if the key was set, False otherwise
     """
     key = f"otp:{id}"
-    result = mfa_redis.set(key, otp, ex= ttl, nx= True)
+    if 'keepttl' in kwargs and kwargs['keepttl']:
+        # Redis will throw if ex or px is also passed
+        result = mfa_redis.set(key, otp, **kwargs)
+    else:
+        result = mfa_redis.set(key, otp, ex=ttl, **kwargs)
     return bool(result)
-    
+
+
+def set_resend_cooldown(user_id: int, ttl: int = 30) -> bool:
+    """
+    Set a resend cooldown (default 30s) for the given user.
+    Returns True if the cooldown was successfully set, False if it already exists.
+    """
+    key = f"otp_cooldown:{user_id}"
+    result = mfa_redis.set(key, 1, ex=ttl, nx=True)
+    return bool(result)
+
 def get_otp(id: int) -> Optional[str]:
     """
     Retrieve OTP for a given email.
