@@ -23,7 +23,7 @@ from flask_login import login_user
 from flask_appbuilder.security.views import AuthDBView
 from flask_appbuilder.security.forms import LoginForm_db
 from flask_appbuilder.utils.base import get_safe_redirect
-from superset.utils.mfa import get_otp, delete_otp, generate_otp, smtp_send_otp, get_del_otp, set_otp_nx, otp_exists, mfa_redis
+from superset.utils.mfa import get_otp, delete_otp, generate_otp, smtp_send_otp, get_del_otp, set_otp, set_resend_cooldown, otp_exists, mfa_redis
 from flask import jsonify
 import logging
 logger = logging.getLogger()
@@ -63,9 +63,10 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
             logger.info("Generated OTP for user %s: %s", user.email, otp)
             
             # store the otp in redis with expiry of 5 minutes against the user id in redis and then store the user id in session
-            if not set_otp_nx(user.id, otp, ttl=300):
-                logger.info("OTP is failing to get set")
-            
+            if not set_otp(user.id, otp, ttl=300, nx = True):
+                logger.info("Failed to set OTP.")
+            if not set_resend_cooldown(user.id, ttl=30):
+                logger.info("Failed to set resend cooldown during login.")
             # send the code to the user email
             logger.info("About to send OTP")
             try: 
@@ -147,6 +148,7 @@ class MFAView(BaseSupersetView):
             session.pop("mfa_next_url", None)
             login_user(user, remember=False)
             delete_otp(user_id)
+            # don't delete the resend cooldown key for conclusions not mentioned here.
             logger.info("Deleted OTP from Redis for user_id=%s", user_id)
             logger.info("MFA success: user_id=%s redirect=%s", user.id, next_url)
             return redirect(next_url)
@@ -168,33 +170,46 @@ class MFAView(BaseSupersetView):
     def resend_code(self) -> FlaskResponse:
         user_id = session.get("mfa_user_id")
         if not user_id:
-            flash(as_unicode("MFA session expired. Please login again."), "warning")
-            return redirect(self.appbuilder.get_url_for_login())
+            return jsonify({"error": "MFA session expired. Please login again."}), 401
 
         user = self.appbuilder.sm.get_user_by_id(user_id)
         if not user:
-            flash(as_unicode("User not found. Please login again."), "warning")
-            return redirect(self.appbuilder.get_url_for_login())
+            return jsonify({"error": "User not found. Please login again."}), 401
 
-        # Check if request is "check only" (frontend asking TTL)
+        otp_key = f"otp:{user_id}"
+        cooldown_key = f"otp_cooldown:{user_id}"
+
+        # if OTP validity already expired -> force new login
+        if not otp_exists(user_id):
+            session.pop("mfa_user_id", None)
+            session.pop("mfa_next_url", None)
+            return jsonify({"error": "OTP expired. Please login again."}), 401
+
+        # check-only flow (SPA polling)
         if request.args.get("check_only") == "true":
-            ttl = mfa_redis.ttl(f"otp:{user_id}")  # remaining seconds
+            ttl = mfa_redis.ttl(cooldown_key)  # OTP validity remaining
             return jsonify({"ttl": max(ttl, 0)}), 200
 
-        # Normal resend flow
-        ttl_key = f"otp:{user_id}"
-        remaining_ttl = mfa_redis.ttl(ttl_key)
+        # enforce cooldown using utility; block extra calls
+        if not set_resend_cooldown(user_id, ttl=30):
+            remaining = mfa_redis.ttl(f"otp_cooldown:{user_id}")
+            return jsonify({"ttl": max(remaining, 0)}), 429
 
-        # Enforce cooldown (e.g., 300s)
-        COOLDOWN = 300
-        if remaining_ttl and remaining_ttl > COOLDOWN - 1:
-            return jsonify({"ttl": remaining_ttl}), 429  # Too many requests
+        # generate new OTP but preserve original OTP expiry window
+        current_ttl = mfa_redis.ttl(otp_key)
+        if current_ttl <= 0:
+            session.pop("mfa_user_id", None)
+            session.pop("mfa_next_url", None)
+            return jsonify({"error": "OTP expired. Please login again."}), 401
 
-        # Delete old OTP & generate new one (the old logic and steps kick in here)
-        get_del_otp(user_id)
         otp = generate_otp()
-        set_otp_nx(user_id, otp, ttl=300)
-        smtp_send_otp(user.email, otp)
-        logger.info("Resent OTP to email: %s", user.email)
+        set_otp(user_id, otp, keepttl= True, xx= True)
 
-        return jsonify({"ttl": COOLDOWN}), 200
+        try:
+            smtp_send_otp(user.email, otp)
+            logger.info("Resent OTP to email=%s (ttl=%s)", user.email, current_ttl)
+        except Exception as e:
+            logger.error("Failed to resend OTP to %s: %s", user.email, str(e))
+            return jsonify({"error": "Failed to resend OTP. Please try again."}), 500
+
+        return jsonify({"ttl": 30}), 200

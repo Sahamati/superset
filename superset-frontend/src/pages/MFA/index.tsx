@@ -25,7 +25,6 @@ import Button from '../../components/Button';
 import { Layout, Typography } from 'antd';
 import { Form } from 'antd';
 
-
 interface MFAForm {
   code: string;
 }
@@ -33,38 +32,52 @@ interface MFAForm {
 // Rewriting the resend button logic. Added a json api that calls and checks the ttl time. The resend button is going to remain active
 // but it will return 429: too many requests error.
 function ResendOtpButton() {
-  const [cooldown, setCooldown] = useState(0);
+  const [cooldown, setCooldown] = React.useState(0);
 
+  // Fetch remaining TTL on mount
   const fetchTTL = async () => {
     try {
       const res = await SupersetClient.post({
-        endpoint: "/mfa/resend?check_only=true",
-        parseMethod: "json",
+        endpoint: '/mfa/resend?check_only=true',
+        parseMethod: 'json',
       });
-      setCooldown(res.json.ttl);
+      if (res.json.ttl !== undefined) {
+        setCooldown(res.json.ttl);
+      }
     } catch (err) {
-      console.error("Failed to fetch OTP TTL", err);
+      console.error('Failed to fetch OTP TTL', err);
     }
   };
 
   const resendOtp = async () => {
     try {
       const res = await SupersetClient.post({
-        endpoint: "/mfa/resend",
-        parseMethod: "json",
+        endpoint: '/mfa/resend',
+        parseMethod: 'json',
       });
-      setCooldown(res.json.ttl);
+
+      // Case 1: backend returns ttl -> just reset countdown
+      if (res.json.ttl !== undefined) {
+        setCooldown(res.json.ttl);
+        return;
+      }
+
+      // Case 2: backend error with message
+      if (res.json.error) {
+        alert(res.json.message || 'Failed to resend OTP');
+        return;
+      }
     } catch (err) {
-      console.error("Failed to resend OTP", err);
+      console.error('Unexpected resend error', err);
+      alert('Something went wrong. Please try again.');
     }
   };
 
-  // On mount, fetch current TTL
+  // Timer effect
   React.useEffect(() => {
-    fetchTTL();
-  }, []);
+    fetchTTL(); // only run once on mount
+  }, []); // empty dependency array
 
-  // cooldown timer
   React.useEffect(() => {
     if (cooldown <= 0) return;
     const interval = setInterval(() => setCooldown(prev => prev - 1), 1000);
@@ -73,11 +86,10 @@ function ResendOtpButton() {
 
   return (
     <Button onClick={resendOtp} disabled={cooldown > 0}>
-      {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend OTP"}
+      {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend OTP'}
     </Button>
   );
 }
-
 
 export default function MFA() {
   const [form] = Form.useForm<MFAForm>();
@@ -86,34 +98,54 @@ export default function MFA() {
   const onFinish = (values: MFAForm) => {
     setLoading(true);
     SupersetClient.postForm('/mfa/verify', { code: values.code }, '_self')
-      .catch(err => logging.error("MFA failed", err))
+      .catch(err => logging.error('MFA failed', err))
       .finally(() => {
         setLoading(false);
       });
   };
 
   return (
-    <Layout style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-      <div style={{ width: 400, padding: 24, borderRadius: 8, boxShadow: "0 2px 8px rgba(0,0,0,0.1)", background: "#fff" }}>
-
-        <Typography.Title level={4} style={{ textAlign: "center", marginBottom: 16 }}>
+    <Layout
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <div
+        style={{
+          width: 400,
+          padding: 24,
+          borderRadius: 8,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          background: '#fff',
+        }}
+      >
+        <Typography.Title
+          level={4}
+          style={{ textAlign: 'center', marginBottom: 16 }}
+        >
           Enter OTP
         </Typography.Title>
-        <Typography.Text style={{ marginBottom: 24, display: "block" }}>
+        <Typography.Text style={{ marginBottom: 24, display: 'block' }}>
           Please enter the 6-digit OTP sent to your registered email.
         </Typography.Text>
 
         <Form layout="vertical" form={form} onFinish={onFinish}>
           <Form.Item<MFAForm>
             name="code"
-            rules={[{ required: true, message: "Please enter your OTP" }, { len: 6, message: "OTP must be 6 digits" }]}
+            rules={[
+              { required: true, message: 'Please enter your OTP' },
+              { len: 6, message: 'OTP must be 6 digits' },
+            ]}
             style={{ marginBottom: 24, minHeight: 56 }} // reserve space
           >
             <Input placeholder="Enter 6-digit OTP" maxLength={6} />
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} >
+            <Button type="primary" htmlType="submit" loading={loading}>
               Verify
             </Button>
             <ResendOtpButton />
@@ -121,6 +153,5 @@ export default function MFA() {
         </Form>
       </div>
     </Layout>
-
   );
 }
