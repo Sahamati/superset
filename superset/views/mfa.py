@@ -54,13 +54,13 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
             
             # Check if OTP already exists
             if session.get("mfa_user_id") == user.id and otp_exists(user.id):
-                logger.info("OTP already exists for user %s: %s, redirecting to verify", user.email, get_otp(user.id))
+                logger.info("OTP already exists for user: %s, redirecting to verify", user.email)
                 flash(as_unicode("Please complete your OTP verification."), "warning")
                 return redirect("/mfa/verify")
             
             # generate the otp for mfa
             otp = generate_otp()
-            logger.info("Generated OTP for user %s: %s", user.email, otp)
+            logger.info("Generated OTP for user: %s", user.email)
             
             # store the otp in redis with expiry of 5 minutes against the user id in redis and then store the user id in session
             if not set_otp(user.id, otp, ttl=300, nx = True):
