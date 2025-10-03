@@ -82,7 +82,7 @@ function ResendOtpButton() {
   }, []); // empty dependency array
 
   React.useEffect(() => {
-    if (cooldown <= 0) return;
+    if (cooldown <= 0) return undefined;
     const interval = setInterval(() => setCooldown(prev => prev - 1), 1000);
     return () => clearInterval(interval);
   }, [cooldown]);
