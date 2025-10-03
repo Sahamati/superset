@@ -18,12 +18,15 @@
  */
 
 import React, { useState } from 'react';
-import { SupersetClient, logging } from '@superset-ui/core';
-
+import {
+  SupersetClient,
+  logging,
+  supersetTheme,
+  addAlpha,
+} from '@superset-ui/core';
+import { Layout, Typography, Form } from 'antd';
 import { Input } from '../../components/Input';
 import Button from '../../components/Button';
-import { Layout, Typography } from 'antd';
-import { Form } from 'antd';
 
 interface MFAForm {
   code: string;
@@ -118,8 +121,11 @@ export default function MFA() {
           width: 400,
           padding: 24,
           borderRadius: 8,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          background: '#fff',
+          boxShadow: `0 2px 8px ${addAlpha(
+            supersetTheme.colors.grayscale.dark2,
+            0.1,
+          )}`,
+          background: `${supersetTheme.colors.grayscale.light5}`,
         }}
       >
         <Typography.Title
