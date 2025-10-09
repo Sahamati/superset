@@ -26,7 +26,7 @@ from flask_appbuilder.utils.base import get_safe_redirect
 from superset.utils.mfa import get_otp, delete_otp, generate_otp, smtp_send_otp, get_del_otp, set_otp, set_resend_cooldown, otp_exists, mfa_redis
 from flask import jsonify
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 from superset.superset_typing import FlaskResponse
 
@@ -54,27 +54,25 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
             
             # Check if OTP already exists
             if session.get("mfa_user_id") == user.id and otp_exists(user.id):
-                logger.info("OTP already exists for user: %s, redirecting to verify", user.email)
+                logger.info("OTP already exists for user, redirecting to mfa verification.")
                 flash(as_unicode("Please complete your OTP verification."), "warning")
                 return redirect("/mfa/verify")
             
             # generate the otp for mfa
             otp = generate_otp()
-            logger.info("Generated OTP for user: %s", user.email)
+            logger.info("Generated OTP for user")
             
-            # store the otp in redis with expiry of 5 minutes against the user id in redis and then store the user id in session
+            # store the otp in redis
             if not set_otp(user.id, otp, ttl=300, nx = True):
                 logger.info("Failed to set OTP.")
             if not set_resend_cooldown(user.id, ttl=30):
                 logger.info("Failed to set resend cooldown during login.")
-            # send the code to the user email
-            logger.info("About to send OTP")
             try: 
                 smtp_send_otp(user.email, otp)
-                logger.info("Sent OTP to email: %s. Check mail for bouncebacks", user.email)
+                logger.info("Sent OTP to email. Check smtp mail for bouncebacks")
             except Exception as e:
                 get_del_otp(user.id)
-                logger.error("Failed to send OTP to %s: %s", user.email, str(e))
+                logger.error("Failed to send OTP: %s", str(e))
                 flash(as_unicode("Failed to send OTP. Please try again."), "warning")
                 return redirect(self.appbuilder.get_url_for_login_with(next_url))
             
@@ -101,7 +99,7 @@ class MFAView(BaseSupersetView):
         user_id = session.get("mfa_user_id")
         if not user_id:
             logger.warning("Incorrect MFA access  order — redirecting to login")
-            flash(as_unicode("MFA session expired. Please login again."), "warning")
+            flash(as_unicode("Session expired or invalid. Please login again."), "warning")
             return redirect(self.appbuilder.get_url_for_login)
         logger.info("Rendering MFA verify page")
         return self.render_app_template()
@@ -122,24 +120,24 @@ class MFAView(BaseSupersetView):
         
         #Step 2
         user_id = session.get("mfa_user_id")
-        logger.info("MFA attempt: user_id=%s, code=%s", user_id, code)
+        logger.info("MFA attempted")
 
         if not user_id:
             logger.warning("MFA session expired - redirecting to login")
-            flash(as_unicode("MFA session expired. Please login again."), "warning")
+            flash(as_unicode("Session expired or invalid. Please login again."), "warning")
             return redirect(self.appbuilder.get_url_for_login())
 
         # Step 3
         otp = get_otp(user_id)
-        logger.info("Retrieved OTP from Redis for user_id=%s: %s", user_id, otp)
+        logger.info("Retrieved OTP for user")
         user = self.appbuilder.sm.get_user_by_id(user_id)
         if not user:
-            logger.error("MFA failed: no user found for id=%s", user_id)
+            logger.error("MFA failed: no user found with id=%s", user_id)
             flash(as_unicode("User not found. Please login again."), "warning")
             return redirect(self.appbuilder.get_url_for_login())
         
         if not otp:
-            flash(as_unicode("MFA session expired or invalid. Please login again."), "warning")
+            flash(as_unicode("Session expired or invalid. Please login again."), "warning")
             return redirect(self.appbuilder.get_url_for_login)
         
         if code == otp:
@@ -149,12 +147,11 @@ class MFAView(BaseSupersetView):
             login_user(user, remember=False)
             delete_otp(user_id)
             # don't delete the resend cooldown key for conclusions not mentioned here.
-            logger.info("Deleted OTP from Redis for user_id=%s", user_id)
-            logger.info("MFA success: user_id=%s redirect=%s", user.id, next_url)
+            logger.info("MFA success: redirect=%s", next_url)
             return redirect(next_url)
         else:
-            logger.warning("Invalid MFA code for user_id=%s", user_id)
-            flash(as_unicode("Invalid MFA code. Please try again."), "danger")
+            logger.warning("Invalid OTP.")
+            flash(as_unicode("Invalid OTP. Please try again."), "danger")
             return redirect("/mfa/verify")
     
     # Additional Resend logic
@@ -170,7 +167,7 @@ class MFAView(BaseSupersetView):
     def resend_code(self) -> FlaskResponse:
         user_id = session.get("mfa_user_id")
         if not user_id:
-            return jsonify({"error": "MFA session expired. Please login again."}), 401
+            return jsonify({"error": "Session expired or invalid. Please login again."}), 401
 
         user = self.appbuilder.sm.get_user_by_id(user_id)
         if not user:
@@ -182,8 +179,8 @@ class MFAView(BaseSupersetView):
         # if OTP validity already expired -> force new login
         if not otp_exists(user_id):
             session.pop("mfa_user_id", None)
-            session.pop("mfa_next_url", None)
-            return jsonify({"error": "OTP expired. Please login again."}), 401
+            flash(as_unicode("OTP expired. Please login again."), "danger")
+            return jsonify({"redirect": "/login/"}), 401
 
         # check-only flow (SPA polling)
         if request.args.get("check_only") == "true":
@@ -207,9 +204,9 @@ class MFAView(BaseSupersetView):
 
         try:
             smtp_send_otp(user.email, otp)
-            logger.info("Resent OTP to email=%s (ttl=%s)", user.email, current_ttl)
+            logger.info("Resent OTP to user email. ttl = %s",current_ttl)
         except Exception as e:
-            logger.error("Failed to resend OTP to %s: %s", user.email, str(e))
+            logger.error("Failed to resend OTP:%s", str(e))
             return jsonify({"error": "Failed to resend OTP. Please try again."}), 500
 
         return jsonify({"ttl": 30}), 200
