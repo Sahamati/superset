@@ -1128,11 +1128,11 @@ FLASK_APP_MUTATOR = None
 
 # smtp server configuration
 EMAIL_NOTIFICATIONS = False  # all the emails are sent using dryrun
-SMTP_HOST = "smtp.gmail.com"
-SMTP_PORT = 587
+SMTP_HOST = "localhost"
 SMTP_STARTTLS = True
 SMTP_SSL = False
-SMTP_USER = "superset@superset.com"
+SMTP_USER = "superset"
+SMTP_PORT = 25
 SMTP_PASSWORD = "superset"
 SMTP_MAIL_FROM = "superset@superset.com"
 # If True creates a default SSL context with ssl.Purpose.CLIENT_AUTH using the

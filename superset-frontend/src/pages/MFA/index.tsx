@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SupersetClient,
   logging,
@@ -27,6 +27,7 @@ import {
 import { Layout, Typography, Form } from 'antd';
 import { Input } from '../../components/Input';
 import Button from '../../components/Button';
+import { useToasts } from 'src/components/MessageToasts/withToasts';
 
 interface MFAForm {
   code: string;
@@ -35,8 +36,8 @@ interface MFAForm {
 // Rewriting the resend button logic. Added a json api that calls and checks the ttl time. The resend button is going to remain active
 // but it will return 429: too many requests error.
 function ResendOtpButton() {
-  const [cooldown, setCooldown] = React.useState(0);
-
+  const [cooldown, setCooldown] = useState(0);
+  const { addDangerToast } = useToasts();
   // Fetch remaining TTL on mount
   const fetchTTL = async () => {
     try {
@@ -72,16 +73,16 @@ function ResendOtpButton() {
       }
     } catch (err) {
       console.error('Unexpected resend error', err);
-      alert('Something went wrong. Please try again.');
+      addDangerToast('Session expired or invalid. Please login again.');
     }
   };
 
   // Timer effect
-  React.useEffect(() => {
-    fetchTTL(); // only run once on mount
-  }, []); // empty dependency array
+  useEffect(() => {
+    fetchTTL();
+  }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (cooldown <= 0) return undefined;
     const interval = setInterval(() => setCooldown(prev => prev - 1), 1000);
     return () => clearInterval(interval);
@@ -150,11 +151,16 @@ export default function MFA() {
             <Input placeholder="Enter 6-digit OTP" maxLength={6} />
           </Form.Item>
 
-          <Form.Item>
+          <Form.Item
+            style={{
+              width: '100%',
+              textAlign: 'right',
+            }}
+          >
+            <ResendOtpButton />
             <Button type="primary" htmlType="submit" loading={loading}>
               Verify
             </Button>
-            <ResendOtpButton />
           </Form.Item>
         </Form>
       </div>
