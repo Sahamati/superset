@@ -20,8 +20,9 @@ from superset.utils.core import send_email_smtp
 import secrets
 from superset import app
 from smtplib import SMTPException
-
+import hashlib
 import redis
+import hmac
 
 from typing import Optional
 import logging
@@ -41,7 +42,7 @@ def smtp_send_otp(user_email: str, otp: str) -> bool:
                 html_content=body,
             )
         except SMTPException as e:
-            logger.warning("Failed to send otp to: %s %s", e)
+            logger.warning("Failed to send otp (smtp)", e)
             return False
 
 # generate otp util    
@@ -121,3 +122,14 @@ def otp_exists(id: int) -> bool:
     if mfa_redis.exists(key):
         return True
     return False
+
+def hash_otp(otp: str, secret_key: str) -> str:
+    """Returns a secure hash of the OTP using HMAC-SHA256."""
+    return hmac.new(secret_key.encode(), otp.encode(), hashlib.sha256).hexdigest()
+
+def verify_otp(provided_otp: str, stored_hash: str, secret_key: str) -> bool:
+    """Compares an OTP with its stored hash safely."""
+    return hmac.compare_digest(
+        hash_otp(provided_otp, secret_key),
+        stored_hash
+    )
