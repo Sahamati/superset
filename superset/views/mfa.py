@@ -16,14 +16,14 @@
 # under the License.
 
 from .base import BaseSupersetView
-from flask import g, redirect, request, flash, session
+from flask import g, redirect, request, flash, session, current_app
 from flask_appbuilder._compat import as_unicode
 from flask_appbuilder import expose
 from flask_login import login_user
 from flask_appbuilder.security.views import AuthDBView
 from flask_appbuilder.security.forms import LoginForm_db
 from flask_appbuilder.utils.base import get_safe_redirect
-from superset.utils.mfa import get_otp, delete_otp, generate_otp, smtp_send_otp, get_del_otp, set_otp, set_resend_cooldown, otp_exists, mfa_redis
+from superset.utils.mfa import get_otp, delete_otp, generate_otp, smtp_send_otp, get_del_otp, set_otp, set_resend_cooldown, otp_exists, mfa_redis, hash_otp, verify_otp
 from flask import jsonify
 import logging
 logger = logging.getLogger(__name__)
@@ -61,9 +61,10 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
             # generate the otp for mfa
             otp = generate_otp()
             logger.info("Generated OTP for user")
+            hashed_otp = hash_otp(otp, current_app.config["SECRET_KEY"])
             
             # store the otp in redis
-            if not set_otp(user.id, otp, ttl=300, nx = True):
+            if not set_otp(user.id, hashed_otp, ttl=300, nx = True):
                 logger.info("Failed to set OTP.")
             if not set_resend_cooldown(user.id, ttl=30):
                 logger.info("Failed to set resend cooldown during login.")
@@ -140,7 +141,7 @@ class MFAView(BaseSupersetView):
             flash(as_unicode("Session expired or invalid. Please login again."), "warning")
             return redirect(self.appbuilder.get_url_for_login)
         
-        if code == otp:
+        if verify_otp(code, otp, current_app.config["SECRET_KEY"]):
             next_url = session.get("mfa_next_url")
             session.pop("mfa_user_id", None)
             session.pop("mfa_next_url", None)
@@ -200,8 +201,9 @@ class MFAView(BaseSupersetView):
             return jsonify({"error": "OTP expired. Please login again."}), 401
 
         otp = generate_otp()
-        set_otp(user_id, otp, keepttl= True, xx= True)
-
+        hashed_otp = hash_otp(otp, current_app.config["SECRET_KEY"])
+        set_otp(user_id, hashed_otp, keepttl= True, xx= True)
+        logger.info("resent otp hash:%s", get_otp(user_id))
         try:
             smtp_send_otp(user.email, otp)
             logger.info("Resent OTP to user email. ttl = %s",current_ttl)
