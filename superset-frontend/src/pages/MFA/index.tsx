@@ -25,9 +25,9 @@ import {
   addAlpha,
 } from '@superset-ui/core';
 import { Layout, Typography, Form } from 'antd';
+import { useToasts } from 'src/components/MessageToasts/withToasts';
 import { Input } from '../../components/Input';
 import Button from '../../components/Button';
-import { useToasts } from 'src/components/MessageToasts/withToasts';
 
 interface MFAForm {
   code: string;
