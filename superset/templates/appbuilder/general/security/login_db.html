@@ -21,8 +21,6 @@
 {% import "superset/macros.html" as macros %}
 
 {% set title = appbuilder.app.config['SIGNIN_TITLE'] %}
-{% set TOU = appbuilder.app.config['TERMS_OF_USE'] %}
-{% set PP = appbuilder.app.config['PRIVACY_POLICY'] %}
 {% block content %}
 
 <div class="container">
@@ -35,13 +33,6 @@
 
                 <form class="form" action="" method="post" name="login" id="login-form">
                     {{form.hidden_tag()}}
-                    <div class="help-block">
-                        {{_("By Signing in, you agree to the ")}}
-                        <a href="{{TOU}}">{{title}} {{_("Terms of Use")}}</a>
-                        {{_(" and ")}}
-                        <a href="{{PP}}">{{_("Sahamati Privacy Policy,")}}</a>
-                        {{_("applicable to access and use of the service.")}}
-                    </div>
                     <div class="help-block">{{_("Enter your login and password below")}}:</div>
                     <div class="control-group{% if form.errors.openid is defined %} error{% endif %}">
                         <label class="control-label" for="username">{{_("Username")}}:</label>
@@ -70,7 +61,7 @@
                         <div class="controls">
                             <br>
                             <div>
-                                <button id="login-button" class="btn btn-primary btn-block" type="submit">
+                                <button class="btn btn-primary btn-block" type="submit" id="login-button">
                                     {{_('Sign In')}}
                                 </button>
                                 {% if appbuilder.sm.auth_user_registration %}
