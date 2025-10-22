@@ -29,6 +29,8 @@ const ChartCreation = lazy(
 
 const MFA = lazy(() => import(/* webpackChunkName: "MFA" */ 'src/pages/MFA'));
 
+const Agreements = lazy(() => import (/* webpackChunkName: "Agreements" */ 'src/pages/Agreements'))
+
 const AnnotationLayerList = lazy(
   () =>
     import(
@@ -136,6 +138,10 @@ export const routes: Routes = [
   {
     path: '/mfa/verify',
     Component: MFA,
+  },
+  {
+    path: '/agreements',
+    Component: Agreements,
   },
   {
     path: '/dashboard/list/',

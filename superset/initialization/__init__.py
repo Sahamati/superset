@@ -154,6 +154,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         from superset.views.all_entities import TaggedObjectsModelView, TaggedObjectView
         from superset.views.annotations import AnnotationLayerView
         from superset.views.api import Api
+        from superset.views.mfa import AgreementsView
         from superset.views.chart.views import SliceAsync, SliceModelView
         from superset.views.core import Superset
         from superset.views.css_templates import (
@@ -296,6 +297,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         #
         # Setup views with no menu
         #
+        appbuilder.add_view_no_menu(AgreementsView)
         appbuilder.add_view_no_menu(Api)
         appbuilder.add_view_no_menu(CssTemplateAsyncModelView)
         appbuilder.add_view_no_menu(CsvToDatabaseView)

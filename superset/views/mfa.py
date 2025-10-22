@@ -15,16 +15,36 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from .base import BaseSupersetView
-from flask import g, redirect, request, flash, session, current_app
+from .base import BaseSupersetView, json_error_response, json_success
+from flask import g, redirect, request, flash, session, current_app, Response
 from flask_appbuilder._compat import as_unicode
 from flask_appbuilder import expose
 from flask_login import login_user
 from flask_appbuilder.security.views import AuthDBView
 from flask_appbuilder.security.forms import LoginForm_db
 from flask_appbuilder.utils.base import get_safe_redirect
-from superset.utils.mfa import get_otp, delete_otp, generate_otp, smtp_send_otp, get_del_otp, set_otp, set_resend_cooldown, otp_exists, mfa_redis, hash_otp, verify_otp
+from superset.utils.mfa import (get_otp,
+delete_otp, 
+generate_otp, 
+smtp_send_otp, 
+get_del_otp, 
+set_otp,
+set_resend_cooldown,
+otp_exists,
+mfa_redis,
+hash_otp,
+verify_otp,
+verify_agreements,
+get_user_agreements,
+require_mfa)
 from flask import jsonify
+import subprocess
+
+from superset import db, utils
+from superset.models.user_agreements import UserAgreements
+import datetime
+import simplejson as json
+
 import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -46,24 +66,20 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
             if not user:
                 flash(as_unicode(self.invalid_login_message), "warning")
                 return redirect(self.appbuilder.get_url_for_login_with(next_url))
-            
-            # If the user role is public, login them
+
             if self.appbuilder.sm.find_role("Public") in user.roles:
                 login_user(user, remember=False)
                 return redirect(next_url)
-            
-            # Check if OTP already exists
+
             if session.get("mfa_user_id") == user.id and otp_exists(user.id):
                 logger.info("OTP already exists for user, redirecting to mfa verification.")
                 flash(as_unicode("Please complete your OTP verification."), "warning")
                 return redirect("/mfa/verify")
             
-            # generate the otp for mfa
             otp = generate_otp()
             logger.info("Generated OTP for user")
             hashed_otp = hash_otp(otp, current_app.config["SECRET_KEY"])
             
-            # store the otp in redis
             if not set_otp(user.id, hashed_otp, ttl=300, nx = True):
                 logger.info("Failed to set OTP.")
             if not set_resend_cooldown(user.id, ttl=30):
@@ -88,15 +104,13 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
 
 class MFAView(BaseSupersetView):
     route_base = "/mfa"
-    #The get page logic for mfa
+
     @expose("/verify", methods=["GET"])
     def verify(self) -> FlaskResponse:
-        # if the user is logged in already, then go to whatever page they wanted to go to
+        
         if g.user is not None and g.user.is_authenticated:
             return redirect(self.appbuilder.get_url_for_index)
         
-        # if the session does not have the user_id, then the mfa session has expired/the user did not come from login
-        # redirect to login page
         user_id = session.get("mfa_user_id")
         if not user_id:
             logger.warning("Incorrect MFA access  order — redirecting to login")
@@ -107,12 +121,6 @@ class MFAView(BaseSupersetView):
     
     @expose("/verify", methods=["POST"])
     def verify_code(self) -> FlaskResponse:
-        
-        # Step1: First, get the code from the form
-        # Step2: Then, get the user_id from the session. Add redirect logic if user_id not found
-        # # The user_id will be there ideally, meaning now the question is what comes first, the code otp processing and checks, or checking the user?
-        # whats the point of checking the code if there is no user? But check the code regardless of user, because it might be a bot attack
-        # Step3 get the code against the user_id
         
         if g.user is not None and g.user.is_authenticated:
             return redirect(self.appbuilder.get_url_for_index)
@@ -142,28 +150,23 @@ class MFAView(BaseSupersetView):
             return redirect(self.appbuilder.get_url_for_login)
         
         if verify_otp(code, otp, current_app.config["SECRET_KEY"]):
-            next_url = session.get("mfa_next_url")
-            session.pop("mfa_user_id", None)
-            session.pop("mfa_next_url", None)
-            login_user(user, remember=False)
             delete_otp(user_id)
-            # don't delete the resend cooldown key for conclusions not mentioned here.
-            logger.info("MFA success: redirect=%s", next_url)
-            return redirect(next_url)
+            # check agreements for the user from the db
+            # continue with the normal workflow only if the user has agreed to both tou and pp, else redirect them to /agreements page
+            if verify_agreements(user_id):
+                next_url = session.get("mfa_next_url")
+                session.pop("mfa_user_id", None)
+                login_user(user, remember=False)
+                logger.info("MFA success: redirect=%s", next_url)
+                return redirect(next_url)
+            session["mfa_status"] = True
+            logger.info("MFA success: redirecting to agreements")
+            return redirect("/agreements")
         else:
             logger.warning("Invalid OTP.")
             flash(as_unicode("Invalid OTP. Please try again."), "danger")
             return redirect("/mfa/verify")
     
-    # Additional Resend logic
-    # The cases for circular calls from the frontend between login and mfa have been handled already. The only way the attackers can
-    # attack the system is if they are going to try and abuse the resend logic. Blocking it is the best course of action and hence, 
-    # only adding the cooldowns to the resend logic should be making more sense than not.
-    # Rest of the resend logic is the same. 
-    # Receive the resend call the call
-    # check if the otp exists and delete it. 
-    # Send out a new mail
-    # Only new thing that has been added is the proper cooldown management for the resend logic.
     @expose("/resend", methods=["POST"])
     def resend_code(self) -> FlaskResponse:
         user_id = session.get("mfa_user_id")
@@ -212,3 +215,78 @@ class MFAView(BaseSupersetView):
             return jsonify({"error": "Failed to resend OTP. Please try again."}), 500
 
         return jsonify({"ttl": 30}), 200
+class AgreementsView(BaseSupersetView):
+    route_base = "/agreements"
+
+    @expose("/", methods=["GET"])
+    def show(self) -> FlaskResponse:
+        if g.user is not None and g.user.is_authenticated:
+            return redirect(self.appbuilder.get_url_for_index)
+        
+        if verify_agreements(session.get("mfa_user_id")):
+            logger.info("User has already accepted agreements. Redirecting to login.")
+            flash(as_unicode("You have already accepted the agreements."), "info")
+            return redirect(self.appbuilder.get_url_for_login)
+        
+        status =session.get("mfa_status")
+        if not status or  status is not True:
+            logger.warning("Agreements accessed without completing MFA")
+            flash(as_unicode("Please complete your OTP verification."), "warning")
+            return redirect("/mfa/verify")
+        
+        return self.render_app_template()
+
+    @expose("/api/status", methods=["GET"])
+    @require_mfa
+    def status(self) -> FlaskResponse:
+        user_id = session.get("mfa_user_id")
+        if not user_id:
+            return json_error_response("No session", status=401)
+
+        ua = get_user_agreements(user_id)
+
+        return json_success(json.dumps({
+            "touAccepted": ua.tou_accepted,
+            "ppAccepted": ua.pp_accepted,
+        }))
+
+    @expose("/api/accept", methods=["POST"])
+    @require_mfa
+    def accept(self) -> FlaskResponse:
+        user_id = session.get("mfa_user_id")
+        if not user_id:
+            return json_error_response("No session", status=401)
+
+        # Try JSON first, fallback to form data (because postForm isn’t JSON)
+        payload = request.get_json(silent=True) or request.form.to_dict()
+        agreement_type = payload.get("type")
+
+        user_agreements = db.session.query(UserAgreements).filter_by(id=user_id).first()
+        if not user_agreements:
+            return json_error_response("User agreements not found", status=404)
+
+        now = datetime.datetime.utcnow()
+        if agreement_type == "tou":
+            user_agreements.tou_accepted = True
+            user_agreements.tou_accepted_on = now
+            user_agreements.tou_version = current_app.config.get("TERMS_OF_USE", 0.0)
+        elif agreement_type == "pp":
+            user_agreements.pp_accepted = True
+            user_agreements.pp_accepted_on = now
+            user_agreements.pp_version = current_app.config.get("PRIVACY_POLICY", 0.0)
+        else:
+            return json_error_response("Invalid agreement type", status=400)
+
+        db.session.commit()
+
+        # If both agreements accepted → finalize login
+        if user_agreements.tou_accepted and user_agreements.pp_accepted:
+            user = self.appbuilder.sm.get_user_by_id(user_id)
+            login_user(user, remember=False)
+            session.pop("mfa_user_id", None)
+            session.pop("mfa_status", None)
+            next_url = session.get("mfa_next_url") or current_app.appbuilder.get_url_for_index()
+            return redirect(next_url)
+
+        # Otherwise still pending
+        return json_success(json.dumps({"success": True}))

@@ -26,7 +26,15 @@ import hmac
 
 from typing import Optional
 import logging
-logger = logging.getLogger("superset")
+
+# Agreement imports:
+from superset import db
+from superset.models.user_agreements import UserAgreements
+from functools import wraps
+from flask import session, request, redirect
+from superset.views.base import json_error_response
+
+logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # otp util
@@ -133,3 +141,50 @@ def verify_otp(provided_otp: str, stored_hash: str, secret_key: str) -> bool:
         hash_otp(provided_otp, secret_key),
         stored_hash
     )
+    
+# Agreements page functions are defined here. Bring these out into its own thing before doing anything else.
+def get_user_agreements(user_id: int) -> Optional[UserAgreements]:
+    return (
+        db.session.query(UserAgreements)
+        .filter(UserAgreements.id == user_id)
+        .first()
+    )
+
+
+def verify_agreements(user_id: int) -> bool:
+    logger.info("Verifying agreements for user_id=%s", user_id)
+    ua = get_user_agreements(user_id)
+    if not ua:
+        logger.error("No agreements found for user_id=%s", user_id)
+        return False
+    return ua.tou_accepted and ua.pp_accepted
+
+
+def require_mfa(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not session.get("mfa_status"):
+            logger.warning(
+                "Blocked agreements access without MFA. "
+                "Path=%s, Method=%s, Remote=%s, Accept=%s",
+                request.path,
+                request.method,
+                request.remote_addr,
+                request.accept_mimetypes.to_header(),
+            )
+
+            # For API/ajax calls → return JSON error with redirect hint
+            if request.accept_mimetypes["application/json"] >= request.accept_mimetypes["text/html"]:
+                return json_error_response(
+                    msg="MFA required",
+                    status=401,
+                    payload={"link": "/mfa/verify"},
+                )
+
+            # For browser navigation → redirect user to MFA verify page
+            return redirect("/mfa/verify")
+
+        # Log success path only if needed (optional)
+        logger.debug("MFA check passed for path=%s", request.path)
+        return f(*args, **kwargs)
+    return wrapper
