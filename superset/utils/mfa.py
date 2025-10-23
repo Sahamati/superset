@@ -173,7 +173,7 @@ def require_mfa(f):
                 request.accept_mimetypes.to_header(),
             )
 
-            # For API/ajax calls → return JSON error with redirect hint
+            # For API/ajax calls -> return JSON error with redirect hint
             if request.accept_mimetypes["application/json"] >= request.accept_mimetypes["text/html"]:
                 return json_error_response(
                     msg="MFA required",
@@ -181,7 +181,7 @@ def require_mfa(f):
                     payload={"link": "/mfa/verify"},
                 )
 
-            # For browser navigation → redirect user to MFA verify page
+            # For browser navigation -> redirect user to MFA verify page
             return redirect("/mfa/verify")
 
         # Log success path only if needed (optional)

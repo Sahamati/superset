@@ -38,9 +38,8 @@ verify_agreements,
 get_user_agreements,
 require_mfa)
 from flask import jsonify
-import subprocess
 
-from superset import db, utils
+from superset import db
 from superset.models.user_agreements import UserAgreements
 import datetime
 import simplejson as json
@@ -68,8 +67,18 @@ class MFAAuthDBView(BaseSupersetView, AuthDBView):
                 return redirect(self.appbuilder.get_url_for_login_with(next_url))
 
             if self.appbuilder.sm.find_role("Public") in user.roles:
-                login_user(user, remember=False)
-                return redirect(next_url)
+                # if the user has already agreed to the agreements, proceed to login
+                if verify_agreements(user.id):
+                    login_user(user, remember=False)
+                    logger.info("Public role login (MFA disabled user) - user has accepted agreements, proceeding to login")
+                    return redirect(next_url)
+                # if the user has not agreed to the agreements, redirect to agreements page
+                else:
+                    session["mfa_user_id"] = user.id
+                    session["mfa_next_url"] = next_url
+                    session["mfa_status"] = True
+                    logger.info("Public role login (MFA disabled user) - user hasn't accepted agreements, redirecting to agreements")
+                    return redirect("/agreements")
 
             if session.get("mfa_user_id") == user.id and otp_exists(user.id):
                 logger.info("OTP already exists for user, redirecting to mfa verification.")
@@ -151,13 +160,12 @@ class MFAView(BaseSupersetView):
         
         if verify_otp(code, otp, current_app.config["SECRET_KEY"]):
             delete_otp(user_id)
-            # check agreements for the user from the db
-            # continue with the normal workflow only if the user has agreed to both tou and pp, else redirect them to /agreements page
+            logger.info("OTP verified successfull")
             if verify_agreements(user_id):
                 next_url = session.get("mfa_next_url")
                 session.pop("mfa_user_id", None)
                 login_user(user, remember=False)
-                logger.info("MFA success: redirect=%s", next_url)
+                logger.info("MFA success: redirect= %s", next_url)
                 return redirect(next_url)
             session["mfa_status"] = True
             logger.info("MFA success: redirecting to agreements")
@@ -265,7 +273,7 @@ class AgreementsView(BaseSupersetView):
         if not user_agreements:
             return json_error_response("User agreements not found", status=404)
 
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now(datetime.timezone.utc)
         if agreement_type == "tou":
             user_agreements.tou_accepted = True
             user_agreements.tou_accepted_on = now
@@ -285,7 +293,7 @@ class AgreementsView(BaseSupersetView):
             login_user(user, remember=False)
             session.pop("mfa_user_id", None)
             session.pop("mfa_status", None)
-            next_url = session.get("mfa_next_url") or current_app.appbuilder.get_url_for_index()
+            next_url = session.pop("mfa_next_url") or current_app.appbuilder.get_url_for_index()
             return redirect(next_url)
 
         # Otherwise still pending

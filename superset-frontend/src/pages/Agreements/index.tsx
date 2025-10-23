@@ -121,7 +121,7 @@ export default function AgreementsPage() {
     >
       {current === 'tou' && (
         <div>
-          <Typography.Title level={3}> SaaNs Terms of Use</Typography.Title>
+          <Typography.Title level={3}> {getBootstrapData().common.conf.SIGNIN_TITLE} Terms of Use</Typography.Title>
           <div
             ref={scrollRef}
             onScroll={handleScroll}
@@ -143,8 +143,8 @@ export default function AgreementsPage() {
             Accept Terms of Use
           </Button>
           {!scrolledToEnd && (
-            <Typography.Text type="secondary" style={{ marginLeft: 8 }}>
-              Please scroll to the bottom to enable
+            <Typography.Text type="secondary" style={{ marginLeft: 8, fontSize: supersetTheme.typography.sizes.s }}>
+              (Please scroll to the bottom to enable)
             </Typography.Text>
           )}
         </div>
@@ -174,8 +174,8 @@ export default function AgreementsPage() {
             Accept Privacy Policy
           </Button>
           {!scrolledToEnd && (
-            <Typography.Text type="secondary" style={{ marginLeft: 8 }}>
-              Please scroll to the bottom to enable
+            <Typography.Text type="secondary" style={{ marginLeft: 8, fontSize: supersetTheme.typography.sizes.s }}>
+              (Please scroll to the bottom to enable)
             </Typography.Text>
           )}
         </div>
