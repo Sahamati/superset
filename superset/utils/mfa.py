@@ -38,20 +38,18 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # otp util
-def smtp_send_otp(user_email: str, otp: str) -> bool:
-        """Send the OTP to the user's email address via SMTP."""
-        subject = "Sahamati SaaNs Login OTP"
-        body = f"Your login verification otp is: {otp}"
-        try:
-            send_email_smtp(
-                to=user_email,
-                subject=subject,
-                config=current_app.config,
-                html_content=body,
-            )
-        except SMTPException as e:
-            logger.warning("Failed to send otp (smtp)", e)
-            return False
+def smtp_send_otp(user_email: str, otp: str, **kwargs) -> None:
+    subject = f"Sahamati {current_app.config['SIGNIN_TITLE']} Login OTP"
+    body = f"Your login verification otp is: {otp}"
+
+    send_email_smtp(
+        to=user_email,
+        subject=subject,
+        config=current_app.config["MFA_EMAIL_CONFIG"],
+        html_content=body,
+        **kwargs,
+    )
+
 
 # generate otp util    
 def generate_otp() -> str:

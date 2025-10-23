@@ -1665,6 +1665,18 @@ def EMAIL_HEADER_MUTATOR(  # pylint: disable=invalid-name,unused-argument
 ) -> MIMEMultipart:
     return msg
 
+# Email configuration for MFA emails
+MFA_EMAIL_CONFIG = {
+    "SMTP_HOST": "localhost",
+    "SMTP_PORT": 25,
+    "SMTP_USER": "superset",
+    "SMTP_PASSWORD": "superset",
+    "SMTP_MAIL_FROM": "superset@superset.com",
+    "SMTP_STARTTLS": True,
+    "SMTP_SSL": False,
+    "SMTP_SSL_SERVER_AUTH": False,
+    "EMAIL_HEADER_MUTATOR": EMAIL_HEADER_MUTATOR,  # explicit
+}
 
 # Define a list of usernames to be excluded from all dropdown lists of users
 # Owners, filters for created_by, etc.
