@@ -114,12 +114,11 @@ export default function AgreementsPage() {
   };
 
   if (loading) return <Loading />;
-  const bootstrapData = getBootstrapData();
-  const tou_template = bootstrapData.common.tou_template;
-  const pp_template = bootstrapData.common.pp_template;
-
+  const { tou_template, pp_template } = getBootstrapData().common;
   return (
-    <Layout style={{ padding: theme.gridUnit*12, maxWidth: 800, margin: '0 auto' }}>
+    <Layout
+      style={{ padding: theme.gridUnit * 12, maxWidth: 800, margin: '0 auto' }}
+    >
       {current === 'tou' && (
         <div>
           <Typography.Title level={3}> SaaNs Terms of Use</Typography.Title>
@@ -134,7 +133,7 @@ export default function AgreementsPage() {
               marginBottom: theme.gridUnit * 4,
             }}
           >
-            <div dangerouslySetInnerHTML={{ __html: tou_template || ''}} />
+            <div dangerouslySetInnerHTML={{ __html: tou_template || '' }} />
           </div>
           <Button
             type="primary"

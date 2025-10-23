@@ -29,7 +29,9 @@ const ChartCreation = lazy(
 
 const MFA = lazy(() => import(/* webpackChunkName: "MFA" */ 'src/pages/MFA'));
 
-const Agreements = lazy(() => import (/* webpackChunkName: "Agreements" */ 'src/pages/Agreements'))
+const Agreements = lazy(
+  () => import(/* webpackChunkName: "Agreements" */ 'src/pages/Agreements'),
+);
 
 const AnnotationLayerList = lazy(
   () =>
