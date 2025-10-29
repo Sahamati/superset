@@ -39,8 +39,8 @@ logger.setLevel(logging.INFO)
 
 # otp util
 def smtp_send_otp(user_email: str, otp: str, **kwargs) -> None:
-    subject = f"Sahamati {current_app.config['SIGNIN_TITLE']} Login OTP"
-    body = f"Your login verification otp is: {otp}"
+    subject = current_app.config.get("MFA_EMAIL_SUBJECT", "Your Login Verification OTP")
+    body = current_app.config.get("MFA_EMAIL_TEMPLATE", "{code}").format(code=otp)
 
     send_email_smtp(
         to=user_email,

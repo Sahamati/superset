@@ -1677,6 +1677,11 @@ MFA_EMAIL_CONFIG = {
     "SMTP_SSL_SERVER_AUTH": False,
     "EMAIL_HEADER_MUTATOR": EMAIL_HEADER_MUTATOR,  # explicit
 }
+MFA_EMAIL_SUBJECT = "Sahamati SaaNs Login OTP"
+MFA_EMAIL_TEMPLATE = """
+<p>Your OTP: <strong>{code}</strong></p>
+<p>This code will expire in 5 minutes.</p>
+"""
 
 # Define a list of usernames to be excluded from all dropdown lists of users
 # Owners, filters for created_by, etc.
