@@ -42,7 +42,7 @@ def smtp_send_otp(user_email: str, otp: str) -> bool:
                 html_content=body,
             )
         except SMTPException as e:
-            logger.warning("Failed to send otp (smtp)", e)
+            logger.warning("Failed to send otp (smtp): %s", e)
             return False
 
 # generate otp util    
