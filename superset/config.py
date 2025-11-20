@@ -499,15 +499,424 @@ DEFAULT_FEATURE_FLAGS: dict[str, bool] = {
     # or to disallow users from viewing other users profile page
     # Do not show user info or profile in the menu
     "MENU_HIDE_USER_INFO": False,
+    "ENABLE_MFA": False
 }
 # ------------------------------
-# Terms of Service URL
+# Agreements Configs
 # ------------------------------
-TERMS_OF_USE = "https://sahamati.org.in/terms-of-use-saans-dashboard/"
+# Terms of Service Version
 # ------------------------------
-# Privacy Policy URL
+TERMS_OF_USE = 1.0 #"https://sahamati.org.in/terms-of-use-saans-dashboard/"
 # ------------------------------
-PRIVACY_POLICY = "https://sahamati.org.in/privacy-policy/"
+# Privacy Policy Version
+# ------------------------------
+PRIVACY_POLICY = 1.0 #"https://sahamati.org.in/privacy-policy/"
+# ------------------------------
+# Templates for Agreements
+# ------------------------------
+# Terms of Service Template
+TOU_TEMPLATE = ''' 
+<div>
+  <style>
+    .agreements-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .agreements-table th, .agreements-table td {
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      vertical-align: top;
+    }
+    .agreements-table th {
+      background: #f8f9fa;
+      text-align: left;
+    }
+    .agreements-table tr:nth-child(even) {
+      background: #fdfdfd;
+    }
+    .agreements-section {
+      margin-bottom: 1.2rem;
+    }
+    .agreements-section strong {
+      color: #444;
+    }
+    .agreements-section p {
+      margin: 0.5rem 0;
+    }
+    .agreements-section ol {
+      margin-left: 1.5rem;
+    }
+    .agreements-section ul {
+      margin-left: 1.5rem;
+      list-style: disc;
+    }
+  </style>
+
+  <p><strong>Version: 1.0</strong></p>
+  <p><strong>Last Updated on: May 29, 2025</strong></p>
+
+  <p>
+    These Terms of Use (“<strong>Terms</strong>”) govern your (“<strong>you</strong>” or “<strong>your</strong>”) access and/or use of the Saans Dashboard (<em>defined below</em>) provided by Sahamati Foundation (“<strong>Sahamati</strong>”, “<strong>we</strong>”, “<strong>us</strong>” or “<strong>our</strong>”).
+    Sahamati is a company established under Section 8 of the Companies Act, 2013, which fosters the establishment and development of common frameworks for interoperability and related standards for its members and other Participants (<em>defined below</em>) in the account aggregator ecosystem.
+    These Terms also include our privacy policy, available at
+    <a href="https://sahamati.org.in/privacy-policy/" target="_blank">https://sahamati.org.in/privacy-policy/</a> (“<strong>Sahamati Privacy Policy</strong>”).
+  </p>
+
+  <p>
+    Please read these Terms carefully before accessing or using the Saans Dashboard. These Terms may be amended by us in accordance with the provisions hereunder, and the Terms, as amended from time to time, shall apply to you. You may always review the current version of these Terms on the Sahamati website.
+  </p>
+
+  <p>
+    These Terms shall be read together with the Sahamati Membership Terms. The terms not defined in these Terms shall have the meaning as ascribed to them under the Sahamati Membership Terms.
+  </p>
+
+  <ol>
+    <li class="agreements-section">
+      <strong>USER ACKNOWLEDGMENT AND CONSENT</strong>
+      <ol>
+        <li>These Terms establish a contractual relationship between you and Sahamati to access and/or use the Saans Dashboard. By accessing and/or using the Saans Dashboard, you agree that you have read, understood, and are bound by these Terms and that you comply with the requirements listed here. If you do not agree to these Terms, you may not access or use the Saans Dashboard.</li>
+        <li>If you represent an entity, organisation, or any other legal person, not being a natural person, you confirm and represent that you are duly authorised by the entity, organisation, or legal person to accept these Terms and have the necessary power and authority to bind such entity, organisation, or legal person to these Terms.</li>
+        <li>You shall be responsible for your agents and/or contractors’ use of the Saans Dashboard on your behalf, and for their compliance with these Terms.</li>
+        <li>You understand and agree that personal data, if any, collected by Sahamati to enable you to access and use the Saans Dashboard, shall be as per the Sahamati Privacy Policy.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>DEFINITIONS</strong>
+      <ol>
+        <li>“<strong>Member(s)</strong>” shall mean an active member of Sahamati that has accepted the Sahamati Membership Terms and includes FIUs, AAs, and FIPs.</li>
+        <li>“<strong>Participant</strong>” shall mean any regulated entity participating in the account aggregator framework, whether as an FIU, AA or an FIP.</li>
+        <li>“<strong>Saans Dashboard</strong>” shall mean the electronic information management tool provided by Sahamati to track, display and store metrics and data points pertaining to API health metrics, FIP-notification health metrics, and other relevant metrics relating to the API health and responses of various Participants, and other such technical publications, including in the form of dashboards, API-based and other forms of reporting etc.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>SERVICES</strong>
+      <ol>
+        <li>Subject to your compliance with these Terms, Sahamati hereby grants you a limited, non-exclusive, non-transferable, non-sublicensable licence to use the Saans Dashboard.</li>
+        <li>You agree that your access to the Saans Dashboard may be based on your membership status with Sahamati. Accordingly, access to certain portions of the Saans Dashboard may only be available to Sahamati Members.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>ACCOUNT CREATION OBLIGATIONS</strong>
+      <ol>
+        <li>In order to access the Saans Dashboard, you may be required to create an account on the Saans Dashboard by providing your details including but not limited to your name, phone number and/or email address (“<strong>Account</strong>”). If you choose to create an Account, you agree to provide and maintain true, accurate, and complete information. Failure to do so may result in termination or suspension.</li>
+        <li>You are responsible for keeping your Account details updated and maintaining confidentiality of credentials. You must notify Sahamati of any unauthorised use.</li>
+        <li>Sahamati reserves the right to disable your access if you are in breach of the Terms or Applicable Law.</li>
+        <li>Your access may be restricted to designated SPOCs. Other persons from your organisation may need separate Accounts.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>RESTRICTIONS</strong>
+      <ol>
+        <li>You agree not to misuse the Saans Dashboard. Prohibited actions include:
+          <ul>
+            <li>Infringing proprietary rights of any person.</li>
+            <li>Copying, distributing, or creating derivative works except as permitted.</li>
+            <li>Transmitting harmful code (viruses, worms, spyware, etc.).</li>
+            <li>Sending spam or unsolicited communications.</li>
+            <li>Scraping or compiling data for unauthorised use.</li>
+            <li>Reverse engineering or decompiling the platform.</li>
+            <li>Violating Applicable Laws.</li>
+          </ul>
+        </li>
+        <li>Sahamati may terminate access if you use the Dashboard for illegal or unauthorised purposes.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>FEES</strong>
+      <ol>
+        <li>The Saans Dashboard is currently free of charge, but Sahamati reserves the right to charge fees prospectively.</li>
+        <li>Continued use after fee changes will be deemed acceptance.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>CONFIDENTIALITY</strong>
+      <p>The information displayed in the Saans Dashboard is proprietary to Sahamati. You may not disclose or copy it except as permitted. Sahamati will take reasonable measures to protect access, but does not guarantee prevention of unauthorised access.</p>
+    </li>
+
+    <li class="agreements-section">
+      <strong>INTELLECTUAL PROPERTY RIGHTS</strong>
+      <ol>
+        <li>All rights in the Saans Dashboard (content, software, trademarks) belong to Sahamati.</li>
+        <li>You may not copy, reproduce, or redistribute Dashboard contents without permission.</li>
+        <li>Sahamati may freely use feedback or suggestions you provide.</li>
+        <li>You grant Sahamati rights to use any content you submit.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>INTEGRATION WITH THIRD PARTY APPLICATIONS</strong>
+      <ol>
+        <li>The Dashboard may integrate with Third Party Applications. Their use is governed by their own terms and policies.</li>
+        <li>Sahamati is not responsible for Third Party Applications and may disable them without liability.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>MODIFICATION OF TERMS</strong>
+      <p>Sahamati may modify these Terms with or without notice. Continued use of the Dashboard means acceptance of modified Terms.</p>
+    </li>
+
+    <li class="agreements-section">
+      <strong>COMMUNICATIONS FROM SAHAMATI</strong>
+      <p>You may receive service announcements, notifications, and newsletters. You can opt out of newsletters, but not service communications.</p>
+    </li>
+
+    <li class="agreements-section">
+      <strong>WARRANTIES AND DISCLAIMERS</strong>
+      <ol>
+        <li>Access and use are at your own risk. Sahamati provides no warranties that the Dashboard is error-free, up-to-date, or suitable for a specific purpose.</li>
+        <li>Sahamati disclaims liability for damages, loss of data, or unavailability.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>INDEMNITY</strong>
+      <p>You agree to indemnify and hold Sahamati harmless from claims, damages, or expenses arising from your breach of these Terms, violation of law, or misconduct.</p>
+    </li>
+
+    <li class="agreements-section">
+      <strong>LIMITATION OF LIABILITY</strong>
+      <ol>
+        <li>Sahamati shall not be liable for indirect, incidental, or consequential damages.</li>
+        <li>Maximum liability is limited to INR 10,000.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>TERM AND TERMINATION</strong>
+      <ol>
+        <li>These Terms remain in effect unless terminated.</li>
+        <li>Sahamati may suspend or terminate access for violations, regulatory orders, or other reasons.</li>
+        <li>Upon termination, you must stop using the Dashboard.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>GOVERNING LAW AND JURISDICTION</strong>
+      <p>These Terms are governed by Indian law. Disputes will be resolved in Bengaluru, India, through courts or ODR processes as applicable.</p>
+    </li>
+
+    <li class="agreements-section">
+      <strong>MISCELLANEOUS PROVISIONS</strong>
+      <ol>
+        <li><strong>Severability:</strong> If any clause is unenforceable, the rest remain valid.</li>
+        <li><strong>Waiver:</strong> No delay in exercising rights is a waiver.</li>
+        <li><strong>Force Majeure:</strong> Neither party is liable for events beyond reasonable control.</li>
+        <li><strong>Notices:</strong> Notices may be delivered by email, courier, or post.</li>
+        <li><strong>Third Party Rights:</strong> No third party shall enforce these Terms.</li>
+      </ol>
+    </li>
+
+    <li class="agreements-section">
+      <strong>CONTACT DETAILS</strong>
+      <p>For rights, grievances, or queries, email us at <a href="mailto:legal@sahamati.org.in">legal@sahamati.org.in</a>.</p>
+    </li>
+  </ol>
+</div>
+'''
+
+# Privacy Policy Template
+PP_TEMPLATE = """ 
+<div>
+  <style>
+    .agreements-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .agreements-table th, .agreements-table td {
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      vertical-align: top;
+    }
+    .agreements-table th {
+      background: #f8f9fa;
+      text-align: left;
+    }
+    .agreements-table tr:nth-child(even) {
+      background: #fdfdfd;
+    }
+    .agreements-section {
+      margin-bottom: 1.2rem;
+    }
+    .agreements-section strong {
+      color: #444;
+    }
+    .agreements-section p {
+      margin: 0.5rem 0;
+    }
+    .agreements-section ol {
+      margin-left: 1.5rem;
+    }
+    .agreements-section ul {
+      margin-left: 1.5rem;
+      list-style: disc;
+    }
+  </style>
+
+  <p><strong>Version: 1.0</strong><br>
+  <strong>Published on: April 01, 2025</strong></p>
+
+  <div class="agreements-section">
+    <p><strong>1. INTRODUCTION</strong></p>
+    <p>Sahamati Foundation (‘<strong>Sahamati</strong>’, ‘<strong>we’</strong> or ‘<strong>us</strong>’) provides various services (‘Service(s)’), including:</p>
+    <ol>
+      <li>Central Registry;</li>
+      <li>Token API;</li>
+      <li>Support Application;</li>
+      <li>SAANS Dashboard; and</li>
+      <li>Other general services, including the website <a href="http://www.sahamati.org.in">www.sahamati.org.in</a></li>
+    </ol>
+    <p>This Privacy Policy (“<strong>Privacy Policy</strong>”) is used to inform individuals regarding Sahamati’s practices in relation to the processing of any personal data.</p>
+    <p>We may process your personal data in accordance with this Privacy Policy. We may revise this Privacy Policy from time to time at our sole discretion, to reflect any updates to our processing activities. You are advised to review this Privacy Policy periodically to check for such updates.</p>
+  </div>
+
+  <div class="agreements-section">
+    <p><strong>2. PERSONAL DATA COLLECTED AND PURPOSES OF PROCESSING</strong></p>
+    <p>We may collect, use, store, transfer, or otherwise process personal data to provide, or in connection with, the Services, to the extent permissible under applicable laws. We require you to ensure that you have obtained appropriate consent(s) and are duly authorised to share any personal data you provide to us. The personal data specified below shall be processed for the corresponding purposes:</p>
+
+    <table class="agreements-table">
+      <thead>
+        <tr>
+          <th><strong>Category of Data</strong></th>
+          <th><strong>Details</strong></th>
+          <th><strong>Purpose(s) of Processing</strong></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td></td><td colspan="2"><strong>Member Onboarding</strong></td></tr>
+        <tr>
+          <td rowspan="5"><strong>Contact and Identification Data</strong></td>
+          <td rowspan="5">We may require provision of certain personal data, including but not limited to your name, designation, corporate email ID and contact number.</td>
+          <td>Such personal data will be used to contact or identify you for the following purposes to:</td>
+        </tr>
+        <tr><td>1. contact you in relation to the Service;</td></tr>
+        <tr><td>2. send emails and other communications;</td></tr>
+        <tr><td>3. improve the Service; and</td></tr>
+        <tr><td>4. provide related support services.</td></tr>
+
+        <tr><td></td><td colspan="2"><strong>Associate Member Onboarding</strong></td></tr>
+        <tr>
+          <td rowspan="5"><strong>Contact and Identification Data</strong></td>
+          <td rowspan="5">We may require provision of certain personal data, including but not limited to your name, designation, corporate email ID and contact number.</td>
+          <td>Such personal data will be used to contact or identify you for the following purposes to:</td>
+        </tr>
+        <tr><td>1. contact you in relation to the Service;</td></tr>
+        <tr><td>2. send emails and other communications;</td></tr>
+        <tr><td>3. improve the Service; and</td></tr>
+        <tr><td>4. provide related support services</td></tr>
+
+        <tr><td></td><td colspan="2"><strong>Central Registry</strong></td></tr>
+        <tr>
+          <td rowspan="5"><strong>Contact and Identification Data</strong></td>
+          <td rowspan="5">We may require provision of certain personal data, including but not limited to your name, designation, corporate email ID and contact number.</td>
+          <td>Such personal data will be used to contact or identify you for the following purposes to:</td>
+        </tr>
+        <tr><td>1. contact you in relation to the Service;</td></tr>
+        <tr><td>2. send emails and other communications;</td></tr>
+        <tr><td>3. improve the Service; and</td></tr>
+        <tr><td>4. provide related support services.</td></tr>
+
+        <tr><td></td><td colspan="2"><strong>Support Application</strong></td></tr>
+        <tr>
+          <td rowspan="6"><strong>Contact and Identification Data</strong></td>
+          <td rowspan="6">We may require provision of certain personal data, including but not limited to your name, designation, corporate email ID and contact number.</td>
+          <td>Such personal data will be used to contact or identify you for the following purposes to:</td>
+        </tr>
+        <tr><td>1. contact you in relation to the Service;</td></tr>
+        <tr><td>2. send emails and other communications;</td></tr>
+        <tr><td>3. improve the Service;</td></tr>
+        <tr><td>4. provide related support services; and</td></tr>
+        <tr><td>5. grievance redressal.</td></tr>
+
+        <tr><td></td><td colspan="2"><strong>Governance Consultations / Committees / User Councils</strong></td></tr>
+        <tr>
+          <td rowspan="3"><strong>Contact and Identification Data</strong></td>
+          <td rowspan="3">We may require provision of certain personal data, including but not limited to your name, designation, corporate email ID and contact number.</td>
+          <td>Such personal data will be used to contact or identify you for the following purposes:</td>
+        </tr>
+        <tr><td>1. To contact you in relation to the topics of discussion in relevant committees, use case councils etc.;</td></tr>
+        <tr><td>2. To onboard you on any third party service providers of Sahamati for voting and other feedback collection platform(s).</td></tr>
+
+        <tr><td></td><td colspan="2"><strong>Sahamati’s General Activities</strong></td></tr>
+        <tr>
+          <td rowspan="4"><strong>Contact and Identification Data</strong></td>
+          <td rowspan="4">We may collect certain personal data, including but not limited to your name, designation, their corporate email ID and contact number.</td>
+          <td>Such personal data will be used to contact or identify you for the following purposes:</td>
+        </tr>
+        <tr><td>1. To contact you in relation to our workshops, events, or other initiatives;</td></tr>
+        <tr><td>2. To register you for our workshops, events, or other initiatives; and</td></tr>
+        <tr><td>3. To contact you in relation to our Services.</td></tr>
+
+        <tr>
+          <td rowspan="4"><strong>Device and Usage Data</strong></td>
+          <td rowspan="4">We may collect data regarding your device, such as your IP address and browser type, and regarding your usage of our websites and Services.</td>
+          <td>Such personal data will be used for the following purposes:</td>
+        </tr>
+        <tr><td>1. To improve our Services;</td></tr>
+        <tr><td>2. To understand user behaviour and preferences; and</td></tr>
+        <tr><td>3. To personalise your experience with us.</td></tr>
+      </tbody>
+    </table>
+
+    <p>In addition to the above, any other personal data collected by Sahamati shall be used and treated in accordance with this Privacy Policy.</p>
+  </div>
+
+  <div class="agreements-section">
+    <p><strong>3. DISCLOSURE OF PERSONAL DATA</strong></p>
+    <ol>
+      <li>We may collect, compile, and share such personal data in order to render the Services. This may include but not be limited to third-party service providers, storage providers, data analytics providers, consultants, lawyers, and auditors. We do not sell your personal data to third parties.</li>
+      <li>We may share personal data if required by law, any competent court, regulator, government or its agency, to disclose such information. Such disclosures are made in good faith and belief that it is reasonably necessary to do so for enforcing this Privacy Policy or in order to comply with applicable laws and regulations.</li>
+    </ol>
+  </div>
+
+  <div class="agreements-section">
+    <p><strong>4. TRANSFERS OF PERSONAL DATA</strong></p>
+    <p>We comply with all applicable laws in respect of storage and transfers of personal data. As a part of providing the Services, personal data provided to Sahamati may be transferred to and stored in countries other than India. This may happen if any of Sahamati’s servers or service providers are located in another country at any point.</p>
+  </div>
+
+  <div class="agreements-section">
+    <p><strong>5. SECURITY OF PERSONAL DATA</strong></p>
+    <p>We implement appropriate security measures to protect all personal data from unauthorised access and follow relevant technology standards prescribed by applicable law.</p>
+  </div>
+
+  <div class="agreements-section">
+    <p><strong>6. THIRD PARTY WEBSITES</strong></p>
+    <p>Some of our Services may contain links to other sites. Clicking on a third-party link will redirect to that site. We have no control over, and assume no responsibility for the content, practices, or processing activities of any third-party sites or services.</p>
+  </div>
+
+  <div class="agreements-section">
+    <p><strong>7. COOKIES</strong></p>
+    <p>Cookies are files with a small amount of data that is commonly used as an anonymous unique identifier. These are sent to your browser from the website that you visit and are stored on your computer’s hard drive.</p>
+    <p>Please see our Cookie Policy (available <a href="/cookie-policy/">here</a>) to understand how Sahamati uses cookies.</p>
+  </div>
+
+  <div class="agreements-section">
+    <p><strong>8. HOW TO WITHDRAW CONSENT</strong></p>
+    <p>Where applicable, you may withdraw your consent to Sahamati’s processing of your personal data by writing to <a href="mailto:legal@sahamati.org.in">legal@sahamati.org.in</a>. Please note that if consent is withdrawn for certain purposes of processing, access to the Services may be restricted or revoked by Sahamati.</p>
+  </div>
+
+  <div class="agreements-section">
+    <p><strong>9. CONTACT US</strong></p>
+    <p>If there are any questions, concerns, requests, grievances, or suggestions about Sahamati’s processing of personal data, do not hesitate to contact us. Our grievance officer can be contacted through the details listed below:</p>
+    <p>Grievance Officer: Pranav Narain<br>
+    Email ID: <a href="mailto:pranav@sahamati.org.in">legal@sahamati.org.in</a><br>
+    Address: Sahamati Foundation, 21/8, Craig Park Layout, MG Road, Bengaluru – 560 001</p>
+  </div>
+</div>
+"""
+
 # SSH Tunnel
 # ------------------------------
 # Allow users to set the host used when connecting to the SSH Tunnel
@@ -1256,6 +1665,23 @@ def EMAIL_HEADER_MUTATOR(  # pylint: disable=invalid-name,unused-argument
 ) -> MIMEMultipart:
     return msg
 
+# Email configuration for MFA emails
+MFA_EMAIL_CONFIG = {
+    "SMTP_HOST": "localhost",
+    "SMTP_PORT": 25,
+    "SMTP_USER": "superset",
+    "SMTP_PASSWORD": "superset",
+    "SMTP_MAIL_FROM": "superset@superset.com",
+    "SMTP_STARTTLS": True,
+    "SMTP_SSL": False,
+    "SMTP_SSL_SERVER_AUTH": False,
+    "EMAIL_HEADER_MUTATOR": EMAIL_HEADER_MUTATOR,  # explicit
+}
+MFA_EMAIL_SUBJECT = "Sahamati SaaNs Login OTP"
+MFA_EMAIL_TEMPLATE = """
+<p>Your OTP: <strong>{code}</strong></p>
+<p>This code will expire in 5 minutes.</p>
+"""
 
 # Define a list of usernames to be excluded from all dropdown lists of users
 # Owners, filters for created_by, etc.
@@ -1503,6 +1929,14 @@ SSL_CERT_PATH: str | None = None
 
 SQLA_TABLE_MUTATOR = lambda table: table
 
+# MFA REDIS CONFIG
+MFA_REDIS_CONFIG = {
+    "port": 6379,
+    "host": "superset_cache",
+    "password": "",
+    "db": 1,
+    "ssl": False,
+}
 
 # Global async query config options.
 # Requires GLOBAL_ASYNC_QUERIES feature flag to be enabled.

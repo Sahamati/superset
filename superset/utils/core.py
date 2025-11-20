@@ -945,7 +945,7 @@ def send_email_smtp(  # pylint: disable=invalid-name,too-many-arguments,too-many
         image.add_header("Content-ID", "<%s>" % msgid)
         image.add_header("Content-Disposition", "inline")
         msg.attach(image)
-    msg_mutator = config["EMAIL_HEADER_MUTATOR"]
+    msg_mutator = config.get("EMAIL_HEADER_MUTATOR") or current_app.config["EMAIL_HEADER_MUTATOR"]
     # the base notification returns the message without any editing.
     new_msg = msg_mutator(msg, **(header_data or {}))
     send_mime_email(smtp_mail_from, recipients, new_msg, config, dryrun=dryrun)

@@ -119,6 +119,7 @@ FRONTEND_CONF_KEYS = (
     "ALERT_REPORTS_DEFAULT_WORKING_TIMEOUT",
     "NATIVE_FILTER_DEFAULT_ROW_LIMIT",
     "PREVENT_UNSAFE_DEFAULT_URLS_ON_DATASET",
+    "SIGNIN_TITLE",
 )
 
 logger = logging.getLogger(__name__)
@@ -421,6 +422,8 @@ def cached_common_bootstrap_data(user: User, locale: str) -> dict[str, Any]:
         "extra_categorical_color_schemes": conf["EXTRA_CATEGORICAL_COLOR_SCHEMES"],
         "theme_overrides": conf["THEME_OVERRIDES"],
         "menu_data": menu_data(user),
+        "tou_template": conf.get("TOU_TEMPLATE"),
+        "pp_template": conf.get("PP_TEMPLATE"),
     }
     bootstrap_data.update(conf["COMMON_BOOTSTRAP_OVERRIDES_FUNC"](bootstrap_data))
     return bootstrap_data

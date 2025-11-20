@@ -27,6 +27,12 @@ const ChartCreation = lazy(
     import(/* webpackChunkName: "ChartCreation" */ 'src/pages/ChartCreation'),
 );
 
+const MFA = lazy(() => import(/* webpackChunkName: "MFA" */ 'src/pages/MFA'));
+
+const Agreements = lazy(
+  () => import(/* webpackChunkName: "Agreements" */ 'src/pages/Agreements'),
+);
+
 const AnnotationLayerList = lazy(
   () =>
     import(
@@ -130,6 +136,14 @@ export const routes: Routes = [
   {
     path: '/superset/welcome/',
     Component: Home,
+  },
+  {
+    path: '/mfa/verify',
+    Component: MFA,
+  },
+  {
+    path: '/agreements',
+    Component: Agreements,
   },
   {
     path: '/dashboard/list/',

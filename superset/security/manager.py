@@ -2333,3 +2333,22 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         return current_app.config["AUTH_ROLE_ADMIN"] in [
             role.name for role in self.get_user_roles()
         ]
+        
+    def is_public(self) -> bool:
+        """
+        Returns true if the current user is a public user False otherwise.
+        
+        :returns: Whether the current user is a public user
+        """
+        return current_app.config["AUTH_ROLE_PUBLIC"] in [
+            role.name for role in self.get_user_roles()
+        ]
+        
+    def register_views(self) -> None:
+        from superset.extensions import feature_flag_manager
+        if feature_flag_manager.is_feature_enabled("ENABLE_MFA"):
+            from superset.views.mfa import MFAAuthDBView
+            from superset.views.mfa import MFAView
+            self.auth_view = self.appbuilder.add_view_no_menu(MFAAuthDBView)
+            self.appbuilder.add_view_no_menu(MFAView)
+        super().register_views()
